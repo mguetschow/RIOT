@@ -197,6 +197,74 @@ inside a modules os boards directory. The RIOT build system has both
 `EXTERNAL_MODULE_DIRS` and `EXTERNAL_BOARD_DIRS` variables to specify
 directories that contain extra modules and extra boards.
 
+## Using subfodlers in application
+
+Applications can contain subfolders.
+
+```
+├── apps
+│   └── my_app
+│       ├── app_dependant
+│       │   └── file.c
+│       ├── Makefile
+│       └── main.c
+└── RIOT
+```
+
+To add subfolders, `SRC` can be used. 
+
+The `Makefile` in my_app will be :
+
+```
+APPLICATION = my_app
+PROJECT_BASE ?= $(CURDIR)/../..
+RIOTBASE ?= $(PROJECT_BASE)/RIOT
+
+# Declare the main.c and all .c file in subfolders
+# that doesn't need to be done with module 
+SRC += main.c
+SRC += app_dependant/file.c
+
+include $(RIOTBASE)/Makefile.include
+```
+
+`SRC` allows creating subfolders without needing to create a module with a `Makefile` but can be combined with modules:
+
+```
+├── apps
+│   └── my_app
+|       ├── my_app_module
+|       |   ├── Makefile
+│       │   └── module.c
+│       ├── app_dependant
+│       │   └── file.c
+│       ├── Makefile
+│       └── main.c
+└── RIOT
+```
+
+my_app got one subfolder and one module called my_app_module. 
+
+When we want to add modules, we have nothing to add in `SRC`; we only add `DIRS` and `USEMODULE`:
+
+```
+APPLICATION = my_app
+PROJECT_BASE ?= $(CURDIR)/../..
+RIOTBASE ?= $(PROJECT_BASE)/RIOT
+
+# Declare directory where the module is and 
+# usage of it. 
+DIRS += my_app_module
+USEMODULE += my_app_module
+
+# Declare the main.c and all .c file in subfolders,
+# which doesn't need to be done with modules.
+SRC += main.c
+SRC += app_dependant/file.c
+
+include $(RIOTBASE)/Makefile.include
+```
+
 ## External Boards
 
 External boards can be ported in an identical way as porting a regular board to
