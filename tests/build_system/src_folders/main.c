@@ -22,22 +22,10 @@
 
 #include <stdio.h>
 
-void module_a(void);
-void module_b(void);
-void folder_a(void);
-void folder_b(void);
 void blob_print(void);
 
 int main(void)
 {
-    puts("./main.c");
-    
-    /* call functions from RIOT module */
-    module_a();
-    module_b();
-    /* call functions from subfolder */
-    folder_a();
-    folder_b();
 
     /* blob test */
     blob_print();
