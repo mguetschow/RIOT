@@ -18,6 +18,10 @@
 
 /* This is needed for netifs_print_ipv6 in main below. */
 #include "net/netif.h"
+#include "shell.h"
+
+#define MAIN_QUEUE_SIZE (4)
+static msg_t _main_msg_queue[MAIN_QUEUE_SIZE];
 
 /* If you need CoAP over DTLS support, you need to include extra dependencies. What's more,
  * you'll also need to load a DTLS credential for message encryption and verification.
@@ -194,6 +198,22 @@ UNICOAP_RESOURCE(greeting) {
 };
 
 int main(void) {
+
+    int res;
+    ipv6_addr_t addr;
+    ipv6_addr_from_str(&addr, "2001:db8::2");
+
+    gnrc_netif_t *netif = gnrc_netif_get_by_type(NETDEV_SLIPDEV, NETDEV_INDEX_ANY);
+    if (!netif) {
+        netif = gnrc_netif_get_by_type(NETDEV_TAP, NETDEV_INDEX_ANY);
+    }
+
+    res = gnrc_netif_ipv6_addr_add(netif, &addr, 64, 0);
+    if (res < 0) {
+        printf("error: unable to set addr: %d\n", res);
+    }
+
+
     /* By default, unicoap_init() is automatically called for you before main().
      * This is because auto_init_unicoap is part of the DEFAULT_MODULE makefile variable.
      * You can opt out of this default behavior by setting DISABLE_MODULE += auto_init_unicoap.
@@ -253,7 +273,7 @@ int main(void) {
      * at least one DTLS credential. */
 #if IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
     /* credman is a utility that manages DTLS credentials. */
-    int res = credman_add(&credential);
+    res = credman_add(&credential);
     if (res < 0 && res != CREDMAN_EXIST) {
         /* Here we ignore duplicate credentials. */
         printf("app: cannot add credential to system: %d\n", res);
@@ -299,4 +319,8 @@ int main(void) {
     printf("app: running unicoap loop on main thread\n");
     unicoap_loop_run();
 #endif
+
+    msg_init_queue(_main_msg_queue, MAIN_QUEUE_SIZE);
+    char line_buf[SHELL_DEFAULT_BUFSIZE];
+    shell_run(NULL, line_buf, SHELL_DEFAULT_BUFSIZE);
 }

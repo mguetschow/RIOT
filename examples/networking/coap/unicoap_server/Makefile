@@ -44,6 +44,26 @@ endif
 USEMODULE += unicoap
 USEMODULE += unicoap_resources_xfa
 
+USEMODULE += shell
+USEMODULE += shell_cmds_default
+
+# on Linux
+# sudo ip a a 2001:db8::1 dev sl0 (for sliptty)
+# sudo ip r a 2001:db8::2 dev tap0 (for native)
+
+# IPV6_HOST_ADDR ?= 2001:db8::1
+# see https://github.com/RIOT-OS/RIOT/pull/20192
+
+# Configure terminal parameters
+ifeq (,$(filter native native32 native64, $(BOARD)))
+  IPV6_PREFIX ?= 2001:db8::/64
+  USEMODULE += slipdev_stdio
+  TERMPROG ?= sudo sh $(RIOTTOOLS)/sliptty/start_network.sh
+  TERMFLAGS ?= -e $(IPV6_PREFIX) $(PORT)
+endif
+
+CFLAGS += -DDEBUG_ASSERT_VERBOSE
+
 # This module is needed for CoAP over UDP
 USEMODULE += unicoap_driver_udp
 
