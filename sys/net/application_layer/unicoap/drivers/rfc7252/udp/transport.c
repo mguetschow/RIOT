@@ -69,6 +69,7 @@ static void _udp_on_event(sock_udp_t* sock, sock_async_flags_t type, void* arg)
         }
         else {
             pdu = unicoap_receiver_buffer;
+            // todo: shouldn't this check truncated somewhere and bail out?
             while (true) {
                 ssize_t chunk_size = sock_udp_recv_buf_aux(
                     sock, &stackbuf, &buffer_ctx, 0, unicoap_endpoint_get_udp(&remote), &aux_rx);
