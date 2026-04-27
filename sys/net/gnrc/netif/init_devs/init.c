@@ -77,6 +77,11 @@ void gnrc_netif_init_devs(void)
         auto_init_esp_eth();
     }
 
+    if (IS_USED(MODULE_ESP_IEEE802154)) {
+        extern void auto_init_esp_ieee802154(void);
+        auto_init_esp_ieee802154();
+    }
+
     /* don't change the order of auto_init_esp_now and auto_init_esp_wifi */
     if (IS_USED(MODULE_ESP_NOW)) {
         extern void auto_init_esp_now(void);
@@ -104,7 +109,7 @@ void gnrc_netif_init_devs(void)
         auto_init_sam0_eth();
     }
 
-    if (IS_USED(MODULE_SLIPDEV)) {
+    if (IS_USED(MODULE_SLIPDEV_NET)) {
         extern void auto_init_slipdev(void);
         auto_init_slipdev();
     }

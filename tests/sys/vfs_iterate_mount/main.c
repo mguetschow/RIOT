@@ -1,9 +1,6 @@
 /*
- * Copyright (C) Christian Amsüss <chrysn@fsfe.org>
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2022 Christian Amsüss <chrysn@fsfe.org>
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -14,11 +11,12 @@
  */
 
 #include <stdio.h>
-#include <assert.h>
 #include <string.h>
 
 #include <vfs.h>
 #include <fs/constfs.h>
+
+#include "test_utils/expect.h"
 
 static constfs_file_t constfs_files[1] = {
     /* Not completely empty -- that'd be a hassle around empty arrays and
@@ -83,7 +81,7 @@ int main(void) {
     res |= vfs_mount(&mount2);
     res |= vfs_mount(&mount3);
     res |= vfs_mount(&mount4);
-    assert(res == 0);
+    expect(res == 0);
     printf("Mounted 1234\n");
 
     /* N1N2N3N4E */

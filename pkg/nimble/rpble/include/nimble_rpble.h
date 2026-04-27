@@ -6,6 +6,8 @@
  * directory for more details.
  */
 
+#pragma once
+
 /**
  * @defgroup    pkg_nimble_rpble RPL-over-BLE for NimBLE
  * @ingroup     pkg_nimble
@@ -81,9 +83,6 @@
  *
  * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
  */
-
-#ifndef NIMBLE_RPBLE_H
-#define NIMBLE_RPBLE_H
 
 #include "nimble_netif.h"
 
@@ -167,7 +166,7 @@ int nimble_rpble_eventcb(nimble_netif_eventcb_t cb);
  *
  * @note    This function is meant to be called only by the RPL implementation
  *
- * @param[in] ctx       current DODAG state
+ * @param[in] ctx       current DODAG state or NULL if the DODAG was cleared.
 
  * @return  0 on success
  * @return  -EALREADY if the given context did not change
@@ -178,5 +177,4 @@ int nimble_rpble_update(const nimble_rpble_ctx_t *ctx);
 }
 #endif
 
-#endif /* NIMBLE_RPBLE_H */
 /** @} */

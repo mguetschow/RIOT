@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2022 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2022 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -373,7 +370,7 @@ void IRAM_ATTR spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t cl
                                    &_spi[bus].timing.clock_reg);
     spi_ll_apply_config(_spi[bus].periph->hw);
 
-#if defined(CPU_FAM_ESP32C3) || defined(CPU_FAM_ESP32S3) || defined(CPU_FAM_ESP32H2)
+#if CPU_FAM_ESP32C3 || CPU_FAM_ESP32C6 || CPU_FAM_ESP32H2 || CPU_FAM_ESP32S3
     /*
      * If the SPI mode has been changed, the clock signal is only set to the
      * correct level at the beginning of the transfer on the ESP32x3. However,
@@ -389,7 +386,7 @@ void IRAM_ATTR spi_acquire(spi_t bus, spi_cs_t cs, spi_mode_t mode, spi_clk_t cl
         spi_transfer_bytes(bus, GPIO_UNDEF, false, &temp, &temp, 1);
         _spi[bus].mode_last = mode;
     }
-#elif defined(CPU_FAM_ESP32) || defined(CPU_FAM_ESP32S2)
+#elif CPU_FAM_ESP32 || CPU_FAM_ESP32S2
     /* This workaround isn't needed on ESP32 and ESP32-S2 */
 #else
 #error Platform implementation is missing
@@ -410,6 +407,8 @@ void IRAM_ATTR spi_release(spi_t bus)
 #if defined(CPU_FAM_ESP32)
 static const char* _spi_names[] = { "CSPI/FSPI", "HSPI", "VSPI"  };
 #elif defined(CPU_FAM_ESP32C3)
+static const char* _spi_names[] = { "SPI", "FSPI"  };
+#elif defined(CPU_FAM_ESP32C6)
 static const char* _spi_names[] = { "SPI", "FSPI"  };
 #elif defined(CPU_FAM_ESP32H2)
 static const char* _spi_names[] = { "SPI", "FSPI"  };

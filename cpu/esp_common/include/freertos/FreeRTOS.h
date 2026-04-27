@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- *
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
  * FreeRTOS to RIOT-OS adaption module for source code compatibility
  */
 
@@ -44,6 +43,8 @@ extern "C" {
 #define pdMS_TO_TICKS(ms)       ((TickType_t)(ms / portTICK_PERIOD_MS))
 
 #define xSemaphoreHandle        SemaphoreHandle_t
+
+typedef void (* TaskFunction_t)( void * );
 
 uint32_t xPortGetTickRateHz(void);
 BaseType_t xPortInIsrContext(void);

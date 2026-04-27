@@ -1,10 +1,7 @@
 /*
- * Copyright (C)  2016 Freie Universität Berlin
- *                2016 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2016 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -126,8 +123,8 @@ static const tc32_conf_t timer_config[] = {
 static const uart_conf_t uart_config[] = {
     {
         .dev      = &SERCOM5->USART,
-        .rx_pin   = GPIO_PIN(PB,23),
-        .tx_pin   = GPIO_PIN(PB,22),
+        .rx_pin   = GPIO_PIN(PB, 23),
+        .tx_pin   = GPIO_PIN(PB, 22),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,
@@ -140,8 +137,8 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM0->USART,
-        .rx_pin   = GPIO_PIN(PA,11),
-        .tx_pin   = GPIO_PIN(PA,10),
+        .rx_pin   = GPIO_PIN(PA, 11),
+        .tx_pin   = GPIO_PIN(PA, 10),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,

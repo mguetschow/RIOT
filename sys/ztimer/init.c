@@ -350,19 +350,21 @@ void ztimer_init(void)
 #  if (ZTIMER_TIMER_FREQ != FREQ_1MHZ) || CONFIG_ZTIMER_PERIPH_TIMER_FORCE_CONVERSION
 #    if (ZTIMER_TIMER_FREQ == FREQ_250KHZ) && !(CONFIG_ZTIMER_PERIPH_TIMER_FORCE_CONVERSION)
     if (IS_ACTIVE(DEVELHELP) && ((periph_timer_freq < 237500) || (periph_timer_freq > 262500))) {
-        LOG_WARNING("ZTIMER_USEC from %" PRIu32 " Hz clock with \"left-shift by 2\" frequency conversion\n",
-                    periph_timer_freq);
+        LOG_WARNING(
+            "ZTIMER_USEC from %" PRIu32 " Hz clock with \"left-shift by 2\" frequency conversion\n",
+            periph_timer_freq);
     }
-    LOG_DEBUG("ztimer_init(): ZTIMER_USEC convert_shift %lu to 1000000\n",
+    LOG_DEBUG("ztimer_init(): ZTIMER_USEC convert_shift %" PRIu32 " to 1000000\n",
               periph_timer_freq);
     ztimer_convert_shift_up_init(&_ztimer_convert_shift_usec,
                                  ZTIMER_USEC_BASE, 2);
 #    elif (ZTIMER_TIMER_FREQ == FREQ_500KHZ) && !(CONFIG_ZTIMER_PERIPH_TIMER_FORCE_CONVERSION)
     if (IS_ACTIVE(DEVELHELP) && ((periph_timer_freq < 487500) || (periph_timer_freq > 512500))) {
-        LOG_WARNING("ZTIMER_USEC from %" PRIu32 " Hz clock with \"left-shift by 1\" frequency conversion\n",
-                    periph_timer_freq);
+        LOG_WARNING(
+            "ZTIMER_USEC from %" PRIu32 " Hz clock with \"left-shift by 1\" frequency conversion\n",
+            periph_timer_freq);
     }
-    LOG_DEBUG("ztimer_init(): ZTIMER_USEC convert_shift %lu to 1000000\n",
+    LOG_DEBUG("ztimer_init(): ZTIMER_USEC convert_shift %" PRIu32 " to 1000000\n",
               periph_timer_freq);
     ztimer_convert_shift_up_init(&_ztimer_convert_shift_usec,
                                  ZTIMER_USEC_BASE, 1);
@@ -382,7 +384,7 @@ void ztimer_init(void)
 
     /* warm-up time if set and needed */
     if (IS_USED(MODULE_ZTIMER_AUTO_ADJUST) &&
-        !(CONFIG_ZTIMER_USEC_ADJUST_SET && CONFIG_ZTIMER_USEC_ADJUST_SLEEP)) {
+        !(CONFIG_ZTIMER_USEC_ADJUST_SET != 0 && CONFIG_ZTIMER_USEC_ADJUST_SLEEP != 0)) {
         if (CONFIG_ZTIMER_AUTO_ADJUST_SETTLE) {
             ztimer_sleep(ZTIMER_USEC, CONFIG_ZTIMER_AUTO_ADJUST_SETTLE);
         }
@@ -396,7 +398,7 @@ void ztimer_init(void)
 #  endif
 
     /* calculate or set 'adjust_set' */
-    if (CONFIG_ZTIMER_USEC_ADJUST_SET) {
+    if (CONFIG_ZTIMER_USEC_ADJUST_SET != 0) {
         ZTIMER_USEC->adjust_set = CONFIG_ZTIMER_USEC_ADJUST_SET;
     }
     else if (IS_USED(MODULE_ZTIMER_AUTO_ADJUST)) {
@@ -409,7 +411,7 @@ void ztimer_init(void)
     }
 
     /* calculate or set 'adjust_sleep' */
-    if (CONFIG_ZTIMER_USEC_ADJUST_SLEEP) {
+    if (CONFIG_ZTIMER_USEC_ADJUST_SLEEP != 0) {
         ZTIMER_USEC->adjust_sleep = CONFIG_ZTIMER_USEC_ADJUST_SLEEP;
     }
     else if (IS_USED(MODULE_ZTIMER_AUTO_ADJUST)) {

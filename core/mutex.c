@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2015 Kaspar Schleiser <kaspar@schleiser.de>
- *               2013 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Kaspar Schleiser <kaspar@schleiser.de>
+ * SPDX-FileCopyrightText: 2013 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -112,7 +109,7 @@ bool mutex_lock_internal(mutex_t *mutex, bool block)
 #if IS_USED(MODULE_CORE_MUTEX_PRIORITY_INHERITANCE) \
         || IS_USED(MODULE_CORE_MUTEX_DEBUG)
         thread_t *me = thread_get_active();
-        mutex->owner = me->pid;
+        mutex->owner = me ? me->pid : KERNEL_PID_UNDEF;
 #endif
 #if IS_USED(MODULE_CORE_MUTEX_DEBUG)
         mutex->owner_calling_pc = pc;

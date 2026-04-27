@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2017 HAW Hamburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 HAW Hamburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -13,7 +10,8 @@
  * @ingroup     drivers_display
  * @brief       Driver for the Hitachi HD44780 LCD driver
  *
- * @note        The driver currently supports direct addressing, no I2C
+ * @note        The driver currently supports both direct addressing
+ *              and I2C if the [PCF857X module](@ref drivers_pcf857x) is used
  *
  * @{
  *

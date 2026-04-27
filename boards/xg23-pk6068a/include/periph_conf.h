@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2022 SSV Software Systems GmbH
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2022 SSV Software Systems GmbH
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -95,9 +92,10 @@ static const i2c_conf_t i2c_config[] = {
         .dev = I2C0,
         .sda_pin = GPIO_PIN(PC, 7),
         .scl_pin = GPIO_PIN(PC, 5),
+        .speed = I2C_SPEED_NORMAL,
         .cmu = cmuClock_I2C0,
         .irq = I2C0_IRQn,
-        .speed = I2C_SPEED_NORMAL
+        .use_internal_pull_ups = true
     }
 };
 

@@ -1,10 +1,6 @@
 /*
- * Copyright (C) 2020 HAW Hamburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- *
+ * SPDX-FileCopyrightText: 2020 HAW Hamburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -575,7 +571,7 @@ static int _config_addr_filter(ieee802154_dev_t *dev, ieee802154_af_cmd_t cmd, c
             kw2xrf_set_addr_short(kw_dev, byteorder_ntohs(*short_addr));
             break;
         case IEEE802154_AF_EXT_ADDR:
-            kw2xrf_set_addr_long(kw_dev, ext_addr->uint64.u64);
+            kw2xrf_set_addr_long(kw_dev, byteorder_ntohll(ext_addr->uint64));
             break;
         case IEEE802154_AF_PANID:
             kw2xrf_set_pan(kw_dev, *pan_id);
@@ -705,6 +701,7 @@ static int _set_csma_params(ieee802154_dev_t *dev, const ieee802154_csma_be_t *b
 
 static const ieee802154_radio_ops_t kw2xrf_ops = {
     .caps =  IEEE802154_CAP_24_GHZ
+          | IEEE802154_CAP_AUTO_ACK
           | IEEE802154_CAP_IRQ_CRC_ERROR
           | IEEE802154_CAP_IRQ_RX_START
           | IEEE802154_CAP_IRQ_TX_DONE

@@ -1,17 +1,23 @@
 {
-  "name": "guide",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "dependencies": {
-    "@astrojs/starlight": "^0.33.1",
-    "astro": "^5.5.3",
-    "sharp": "^0.32.5"
-  }
+    "name": "guide",
+    "type": "module",
+    "version": "0.0.1",
+    "scripts": {
+        "dev": "astro dev",
+        "start": "astro dev",
+        "build": "astro build",
+        "preview": "astro preview",
+        "astro": "astro"
+    },
+    "dependencies": {
+        "@astrojs/rss": "4.0.18",
+        "@astrojs/starlight": "0.38.3",
+        "astro": "6.1.5",
+        "rehype-github-emoji": "1.0.0",
+        "sharp": "0.34.5",
+        "starlight-image-zoom": "0.14.1"
+    },
+    "devDependencies": {
+        "typescript": "6.0.2"
+    }
 }

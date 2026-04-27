@@ -1,16 +1,13 @@
 /*
- * Copyright (C) 2020 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
 
 /**
  * @defgroup    drivers_touch_dev Touch device generic API
- * @ingroup     drivers_misc
+ * @ingroup     drivers_display
  * @brief       Define the generic API of a touch device
  * @experimental This API is experimental and in an early state - expect
  *               changes!

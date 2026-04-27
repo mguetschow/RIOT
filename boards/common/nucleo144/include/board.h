@@ -1,19 +1,14 @@
 /*
- * Copyright (C) 2017 Inria
- *               2017 OTAKeys
- *               2018 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Inria
+ * SPDX-FileCopyrightText: 2017 OTAKeys
+ * SPDX-FileCopyrightText: 2018 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
 
 /**
- * @defgroup    boards_common_nucleo144 STM32 Nucleo-144
- * @ingroup     boards
- * @brief       Support for STM32 Nucleo-144 boards
+ * @ingroup     boards_common_nucleo144
  * @{
  *
  * @file
@@ -47,9 +42,15 @@ extern "C" {
 #define LED0_PORT_NUM       PORT_B
 #endif
 
-#define LED1_PIN_NUM        7
-#define LED1_PORT           GPIO_PORT_B /**< GPIO port of LED 1 */
-#define LED1_PORT_NUM       PORT_B
+#if defined(CPU_MODEL_STM32H753ZI)
+#  define LED1_PIN_NUM        1
+#  define LED1_PORT           GPIO_PORT_E /**< GPIO port of LED 1 */
+#  define LED1_PORT_NUM       PORT_E
+#else
+#  define LED1_PIN_NUM        7
+#  define LED1_PORT           GPIO_PORT_B /**< GPIO port of LED 1 */
+#  define LED1_PORT_NUM       PORT_B
+#endif
 
 #if defined(CPU_MODEL_STM32L552ZE)
 #define LED2_PIN_NUM        9

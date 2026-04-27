@@ -1,9 +1,6 @@
 /*
- * Copyright (c) 2015-2017 Ken Bannister. All rights reserved.
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015-2017 Ken Bannister
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -122,7 +119,7 @@ static void _rtc_notify_observers(void *arg)
     }
     size_t len;
     char str_time[20] = "";
-    uint8_t buf[sizeof(coap_hdr_t) + COAP_TOKEN_LENGTH_MAX + 1 + sizeof(str_time)];
+    uint8_t buf[sizeof(coap_udp_hdr_t) + COAP_TOKEN_LENGTH_MAX + 1 + sizeof(str_time)];
     coap_pkt_t pdu;
     const coap_resource_t *rtc_resource = NULL;
     const gcoap_listener_t *listener = NULL;

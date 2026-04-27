@@ -4,8 +4,12 @@ ifneq (,$(filter adc%1c,$(USEMODULE)))
   USEMODULE += adcxx1c
 endif
 
-ifneq (,$(filter ads101%,$(USEMODULE)))
-  USEMODULE += ads101x
+ifneq (,$(filter ads101% ads111%,$(USEMODULE)))
+  USEMODULE += ads1x1x
+endif
+
+ifneq (,$(filter amg88%,$(USEMODULE)))
+  USEMODULE += amg88xx
 endif
 
 ifneq (,$(filter apds99%,$(USEMODULE)))
@@ -54,6 +58,10 @@ endif
 
 ifneq (,$(filter ft6% ft5% ft3%,$(USEMODULE)))
   USEMODULE += ft5x06
+endif
+
+ifneq (,$(filter gp8%,$(USEMODULE)))
+  USEMODULE += gp8xxx
 endif
 
 ifneq (,$(filter hmc5883l_%,$(USEMODULE)))
@@ -238,8 +246,12 @@ ifneq (,$(filter si70%,$(USEMODULE)))
   USEMODULE += si70xx
 endif
 
-ifneq (,$(filter slipdev_%,$(USEMODULE)))
-  USEMODULE += slipdev
+ifneq (,$(filter slipdev,$(USEMODULE)))
+  USEMODULE += slipdev_net
+endif
+
+ifneq (,$(filter slipdev_% stdio_slipdev,$(USEMODULE)))
+  USEMODULE += slipmux
 endif
 
 ifneq (,$(filter stmpe811_%,$(USEMODULE)))

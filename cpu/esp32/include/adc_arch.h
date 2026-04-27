@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2022 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2022 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -49,16 +46,6 @@ typedef enum {
     ADC_ATTENUATION_6_DB = ADC_ATTEN_DB_6,    /**< full-range is about 2.2 V */
     ADC_ATTENUATION_12_DB = ADC_ATTEN_DB_12,  /**< full-range is about 3.3 V */
 } adc_attenuation_t;
-
-/**
- * @brief   Attenuation of 11 dB is depcricated and has to be mapped
- *
- * The define ensures the compatibility with older versions.
- *
- * @deprecated `ADC_ATTENUATION_11_DB` is deprecated, use
- *             `ADC_ATTENUATION_12_DB` instead.
- */
-#define ADC_ATTENUATION_11_DB   ADC_ATTENUATION_12_DB
 
 /**
  * @brief   Set the attenuation for the ADC line. Default attenuation is 12 dB.

@@ -17,22 +17,16 @@
 #include <errno.h>
 #include <stdbool.h>
 
-#include "fmt.h"
-#include "log.h"
 #include "mutex.h"
 #include "net/credman.h"
 #include "net/gcoap.h"
-#include "net/af.h"
 #include "net/dns/cache.h"
 #include "net/ipv4/addr.h"
 #include "net/ipv6/addr.h"
 #include "net/sock/dns.h"
 #include "net/sock/udp.h"
-#include "net/sock/util.h"
 #include "random.h"
-#include "string_utils.h"
 #include "uri_parser.h"
-#include "ut_process.h"
 
 #include "net/gcoap/dns.h"
 
@@ -317,9 +311,13 @@ ssize_t gcoap_dns_server_proxy_get(char *proxy, size_t proxy_len)
     ssize_t res = 0;
     mutex_lock(&_client_mutex);
     if (_dns_server_uri_isset()) {
-        res = strscpy(proxy, _proxy, proxy_len);
-        if (res == -E2BIG) {
+        res = (ssize_t)strlen(_proxy);
+        if ((size_t)res >= proxy_len) {
             res = -ENOBUFS;
+        }
+        else {
+            strncpy(proxy, _proxy, proxy_len - 1);
+            proxy[res] = '\0';
         }
     }
     mutex_unlock(&_client_mutex);
@@ -493,7 +491,7 @@ static ssize_t _req_init(coap_pkt_t *pdu, uri_parser_result_t *uri_comp, bool co
     gcoap_req_init_path_buffer(pdu, pdu->payload, pdu->payload_len, COAP_METHOD_FETCH,
                                uri_comp->path, uri_comp->path_len);
     if (con) {
-        coap_hdr_set_type(pdu->hdr, COAP_TYPE_CON);
+        coap_pkt_set_type(pdu, COAP_TYPE_CON);
     }
 
     if (coap_opt_add_format(pdu, COAP_FORMAT_DNS_MESSAGE) < 0) {
@@ -539,17 +537,23 @@ static int _do_block(coap_pkt_t *pdu, const sock_udp_ep_t *remote,
     }
     len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
 
-    len += coap_blockwise_put_bytes(&slicer, pdu->payload,
-                                    context->dns_buf,
-                                    context->dns_buf_len);
+    int res = coap_blockwise_put_bytes_pkt(pdu, &slicer,
+                                           context->dns_buf,
+                                           context->dns_buf_len);
+
+    if (res) {
+        return res;
+    }
 
     coap_block1_finish(&slicer);
 
-    if ((len = _send(pdu->hdr, len, remote, slicer.start == 0, context, tl_type)) <= 0) {
+    len = _send(pdu->buf, len, remote, slicer.start == 0, context, tl_type);
+
+    if (len <= 0) {
         DEBUG("gcoap_dns: msg send failed: %" PRIdSIZE "\n", len);
-        return len;
     }
-    return len;
+
+    return (int)len;
 }
 
 static ssize_t _req(_req_ctx_t *context)
@@ -583,7 +587,7 @@ static ssize_t _req(_req_ctx_t *context)
         }
         len = coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
         memcpy(pdu->payload, context->dns_buf, context->dns_buf_len);
-        return _send(pdu->hdr, len + context->dns_buf_len, &_remote, true, context, tl_type);
+        return _send(pdu->buf, len + context->dns_buf_len, &_remote, true, context, tl_type);
     }
 }
 
@@ -698,7 +702,7 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
             unsigned msg_type = coap_get_type(pdu);
             int len;
 
-            pdu->payload = (uint8_t *)pdu->hdr;
+            pdu->payload = pdu->buf;
             pdu->payload_len = CONFIG_GCOAP_DNS_PDU_BUF_SIZE;
             tl_type = _req_init(pdu, &_uri_comp, msg_type == COAP_TYPE_ACK);
             block.blknum++;
@@ -712,7 +716,7 @@ static void _resp_handler(const gcoap_request_memo_t *memo, coap_pkt_t *pdu,
                 goto unlock;
             }
             len = coap_opt_finish(pdu, COAP_OPT_FINISH_NONE);
-            if ((len = _send((uint8_t *)pdu->hdr, len, remote, false, context, tl_type)) <= 0) {
+            if ((len = _send(pdu->buf, len, remote, false, context, tl_type)) <= 0) {
                 DEBUG("gcoap_dns: Unable to request next block: %d\n", len);
                 context->res = len;
                 goto unlock;

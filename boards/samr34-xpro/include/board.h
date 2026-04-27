@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Mesotic SAS
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Mesotic SAS
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -44,8 +41,8 @@ extern "C" {
  * @name Board specific configuration
  *  @{
  */
-#define TCXO_PWR_PIN                        GPIO_PIN(PA, 9)     /**< 32 MHz oscillator for radio enable */
-#define TX_OUTPUT_SEL_PIN                   GPIO_PIN(PA, 13)    /**< BAND_SEL */
+#define TCXO_PWR_PIN                GPIO_PIN(PA, 9)     /**< 32 MHz oscillator for radio enable */
+#define TX_OUTPUT_SEL_PIN           GPIO_PIN(PA, 13)    /**< BAND_SEL */
 /** @}*/
 
 /**

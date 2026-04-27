@@ -16,8 +16,14 @@
 : "${RIOTBASE:=$(cd "$(dirname "$0")"/../../../ || exit; pwd)}"
 : "${RIOTTOOLS:=${RIOTBASE}/dist/tools}"
 
-# The uf2conv script lists all currently mounted devices with UF2 bootloader
-MOUNTPOINT=$("${RIOTTOOLS}"/uf2/uf2conv.py --list | cut -d ' ' -f1)
+# Allow overriding the UF2 mass storage mountpoint.
+# This is useful on systems where automatic mount detection is unreliable.
+if [ -n "${UF2_MOUNTPOINT}" ]; then
+    MOUNTPOINT="${UF2_MOUNTPOINT}"
+else
+    # The uf2conv script lists all currently mounted devices with UF2 bootloader
+    MOUNTPOINT=$("${RIOTTOOLS}"/uf2/uf2conv.py --list | cut -d ' ' -f1)
+fi
 
 if [ -z "${MOUNTPOINT}" ]; then
     echo "No device with UF2 bootloader found!"
@@ -27,7 +33,9 @@ fi
 if [ ! "$(echo "${MOUNTPOINT}" | wc -l)" -eq 1 ]; then
     echo "More than one device with UF2 bootloader found!"
     echo "RIOT cannot distinguish the correct device."\
-    "Please connect no more than one device at a time."
+    "Please connect no more than one device at a time"\
+    "or specify which device to use with the UF2_MOUNTPOINT environment"\
+    "variable."
     exit 1
 fi
 
@@ -53,7 +61,7 @@ if [ "${SOFTDEVICE}" = "not found" ] && [ "${UF2_SOFTDEV}" != "DROP" ]; then
     echo -e "\033[0;31mNo SoftDevice present on the device, but the compilation is set" \
     "to expect a SoftDevice."
     echo -e "For more information see:" \
-    "https://doc.riot-os.org/group__boards__common__adafruit-nrf52-bootloader.html#ada-nrf52-update"\
+    "https://api.riot-os.org/group__boards__common__adafruit-nrf52-bootloader.html#ada-nrf52-update"\
     "\033[0m"
     exit 1
 fi

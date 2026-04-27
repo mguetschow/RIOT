@@ -218,6 +218,11 @@ bool suit_worker_trigger(const char *url, size_t len)
 
     assert(len != 0); /* A zero-length URI is invalid, but _url[0] == '\0' is
                          special to _suit_worker_thread */
+
+    if (len == 0 || len > sizeof(_url)) {
+        return false;
+    }
+
     memcpy(_url, url, len);
     _url[len] = '\0';
 
@@ -265,5 +270,8 @@ int suit_worker_try_prepare(uint8_t **buffer, size_t *size)
     }
 
     *buffer = _manifest_buf;
+    if (!*size) {
+        *size = SUIT_MANIFEST_BUFSIZE;
+    }
     return 0;
 }

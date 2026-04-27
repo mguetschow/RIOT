@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2014-2015 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2014-2015 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -139,11 +136,11 @@ static const tc32_conf_t timer_config[] = {
 static const uart_conf_t uart_config[] = {
     {
         .dev      = &SERCOM0->USART,
-        .rx_pin   = GPIO_PIN(PA,5),
-        .tx_pin   = GPIO_PIN(PA,4),
+        .rx_pin   = GPIO_PIN(PA, 5),
+        .tx_pin   = GPIO_PIN(PA, 4),
 #ifdef MODULE_PERIPH_UART_HW_FC
-        .rts_pin  = GPIO_PIN(PA,6),
-        .cts_pin  = GPIO_PIN(PA,7),
+        .rts_pin  = GPIO_PIN(PA, 6),
+        .cts_pin  = GPIO_PIN(PA, 7),
 #endif
         .mux      = GPIO_MUX_D,
         .rx_pad   = UART_PAD_RX_1,
@@ -157,11 +154,11 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM5->USART,
-        .rx_pin   = GPIO_PIN(PA,23),
-        .tx_pin   = GPIO_PIN(PA,22),
+        .rx_pin   = GPIO_PIN(PA, 23),
+        .tx_pin   = GPIO_PIN(PA, 22),
 #ifdef MODULE_PERIPH_UART_HW_FC
-        .rts_pin  = GPIO_PIN(PB,22),
-        .cts_pin  = GPIO_PIN(PB,23),
+        .rts_pin  = GPIO_PIN(PB, 22),
+        .cts_pin  = GPIO_PIN(PB, 23),
 #endif
         .mux      = GPIO_MUX_D,
         .rx_pad   = UART_PAD_RX_1,

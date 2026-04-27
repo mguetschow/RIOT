@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2016 Kees Bakker, SODAQ
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Kees Bakker, SODAQ
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -41,8 +38,8 @@ extern "C" {
 static const uart_conf_t uart_config[] = {
     {
         .dev      = &SERCOM0->USART,
-        .rx_pin   = GPIO_PIN(PA,9),
-        .tx_pin   = GPIO_PIN(PA,10),
+        .rx_pin   = GPIO_PIN(PA, 9),
+        .tx_pin   = GPIO_PIN(PA, 10),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,
@@ -55,8 +52,8 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM5->USART,
-        .rx_pin   = GPIO_PIN(PB,31),
-        .tx_pin   = GPIO_PIN(PB,30),
+        .rx_pin   = GPIO_PIN(PB, 31),
+        .tx_pin   = GPIO_PIN(PB, 30),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,
@@ -69,8 +66,8 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM4->USART,
-        .rx_pin   = GPIO_PIN(PB,13),
-        .tx_pin   = GPIO_PIN(PB,14),
+        .rx_pin   = GPIO_PIN(PB, 13),
+        .tx_pin   = GPIO_PIN(PB, 14),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,
@@ -83,8 +80,8 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM1->USART,
-        .rx_pin   = GPIO_PIN(PA,17),
-        .tx_pin   = GPIO_PIN(PA,18),
+        .rx_pin   = GPIO_PIN(PA, 17),
+        .tx_pin   = GPIO_PIN(PA, 18),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,

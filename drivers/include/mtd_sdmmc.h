@@ -1,17 +1,14 @@
 /*
- * Copyright (C) 2017 HAW-Hamburg
- *               2023 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 HAW Hamburg
+ * SPDX-FileCopyrightText: 2023 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
 
 /**
  * @defgroup    drivers_mtd_sdmmc MTD wrapper for SD/MMC devices
- * @ingroup     drivers_storage
+ * @ingroup     drivers_mtd
  * @brief       Driver for SD Memory Cards and MMCs/eMMCs using the MTD interface
  *
  * @{

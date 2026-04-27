@@ -1,17 +1,14 @@
 /*
- * Copyright (C) 2016 Eistec AB
- *               2017 OTA keys S.A.
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Eistec AB
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
 
 /**
  * @defgroup    drivers_mtd_spi_nor Serial NOR flash
- * @ingroup     drivers_storage
+ * @ingroup     drivers_mtd
  * @brief       Driver for serial NOR flash memory technology devices attached via SPI
  *
  * @{

@@ -1,9 +1,6 @@
 /*
- * Copyright 2023 Christian Amsüss
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2023 Christian Amsüss
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -120,6 +117,8 @@ void ws281x_write_buffer(ws281x_t *dev, const void *buf, size_t size)
             while (!timer_poll_channel(WS281X_TIMER_DEV, 1)) {}
             gpio_ll_clear(port, mask);
             timer_stop(WS281X_TIMER_DEV);
+            timer_clear(WS281X_TIMER_DEV, 0);
+            timer_clear(WS281X_TIMER_DEV, 1);
 
             last_bit = bit;
         }
@@ -145,7 +144,7 @@ int ws281x_init(ws281x_t *dev, const ws281x_params_t *params)
 
     err = gpio_ll_init(port, pin, gpio_ll_out);
     DEBUG("Initializing port %x pin %d (originally %x): %d\n",
-            port, pin, params->pin, err);
+            port, pin, (unsigned)params->pin, err);
     if (err != 0) {
         return -EIO;
     }
@@ -156,6 +155,8 @@ int ws281x_init(ws281x_t *dev, const ws281x_params_t *params)
         return -EIO;
     }
     timer_stop(WS281X_TIMER_DEV);
+    timer_clear(WS281X_TIMER_DEV, 0);
+    timer_clear(WS281X_TIMER_DEV, 1);
 
     /* We're not trying to make an assessment on whether that means we can
      * manage or not, for that also depends on the number of instructions in

@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -21,6 +18,7 @@
 #define ENABLE_DEBUG 0
 #include "debug.h"
 
+#include "esp_wifi.h"
 #include "sdk/sdk.h"
 #include "syscalls.h"
 
@@ -51,6 +49,11 @@ void pm_off(void)
 void pm_reboot(void)
 {
     DEBUG("%s\n", __func__);
+
+    if (IS_USED(MODULE_ESP_WIFI_ANY)) {
+        /* stop WiFi if necessary */
+        esp_wifi_stop();
+    }
 
 #ifdef MODULE_PERIPH_RTT
     /* save counters */

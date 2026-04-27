@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -107,7 +104,11 @@ extern "C" {
 #define ILI9341_PARAM_RGB       (1)                             /**< RGB configuration */
 #define ILI9341_PARAM_INVERTED  (1)                             /**< Inversion configuration */
 #define ILI9341_PARAM_ROTATION  (ILI9341_ROTATION_VERT)         /**< Rotation mode */
-#define ILI9341_PARAM_OFFSET_X  (80)                            /**< Vertical rotation requires a 80 pixel offset */
+
+/**
+ * @brief Vertical rotation requires a 80 pixel offset
+ */
+#define ILI9341_PARAM_OFFSET_X  (80)
 /** @} */
 
 #ifdef __cplusplus

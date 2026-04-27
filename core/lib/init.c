@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2016 Kaspar Schleiser <kaspar@schleiser.de>
- *               2013 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Kaspar Schleiser <kaspar@schleiser.de>
+ * SPDX-FileCopyrightText: 2013 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -51,6 +48,10 @@ static char idle_stack[THREAD_STACKSIZE_IDLE];
 static void *main_trampoline(void *arg)
 {
     (void)arg;
+
+#if MODULE_VFS
+    vfs_bind_stdio();
+#endif
 
     if (IS_USED(MODULE_AUTO_INIT)) {
         auto_init();
@@ -136,8 +137,4 @@ void early_init(void)
     }
 
     stdio_init();
-
-#if MODULE_VFS
-    vfs_bind_stdio();
-#endif
 }

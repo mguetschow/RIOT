@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2022 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2022 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -110,6 +107,18 @@
 #  define CONFIG_SOC_BT_SUPPORTED               SOC_BT_SUPPORTED
 #  define CONFIG_SOC_PM_SUPPORT_BT_PD           SOC_PM_SUPPORT_BT_PD
 #  define CONFIG_SOC_PM_SUPPORT_BT_WAKEUP       SOC_PM_SUPPORT_BT_WAKEUP
+#endif
+
+/**
+ * ESP32-H2 IEEE 802.15.4 driver configuration (DO NOT CHANGE)
+ */
+#if MODULE_ESP_IEEE802154
+#  define CONFIG_IEEE802154_ENABLED             1
+#  define CONFIG_IEEE802154_CCA_ED              1
+#  define CONFIG_IEEE802154_CCA_MODE            1
+#  define CONFIG_IEEE802154_CCA_THRESHOLD       -60
+#  define CONFIG_IEEE802154_PENDING_TABLE_SIZE  20
+#  define CONFIG_IEEE802154_RX_BUFFER_SIZE      20
 #endif
 
 /**
@@ -299,6 +308,8 @@
 #  include "sdkconfig_esp32.h"
 #elif defined(CPU_FAM_ESP32C3)
 #  include "sdkconfig_esp32c3.h"
+#elif defined(CPU_FAM_ESP32C6)
+#  include "sdkconfig_esp32c6.h"
 #elif defined(CPU_FAM_ESP32H2)
 #  include "sdkconfig_esp32h2.h"
 #elif defined(CPU_FAM_ESP32S2)

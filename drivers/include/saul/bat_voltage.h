@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2024 TU Dresden
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2024 TU Dresden
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -39,7 +36,7 @@ typedef struct {
      *
      * @param[in] adc_sample    The raw ADC sample.
      *
-     * @return Voltage value for phydat.
+     * @return Voltage value in 10^phydat_scale*V for phydat.
      */
     int16_t (*convert)(int32_t adc_sample);
 } saul_bat_voltage_params_t;

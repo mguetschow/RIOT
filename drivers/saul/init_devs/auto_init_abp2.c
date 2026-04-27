@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2024 CNRS, France
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2024 CNRS, France
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -60,7 +57,7 @@ void auto_init_abp2(void)
         saul_entries[(i * 2)].dev = &(abp2_devs[i]);
         saul_entries[(i * 2)].name = abp2_saul_info[i][0].name;
         saul_entries[(i * 2)].driver = &abp2_saul_driver_press;
-        saul_reg_add(&(saul_entries[i]));
+        saul_reg_add(&(saul_entries[(i * 2)]));
 
         /* temperature */
         saul_entries[(i * 2) + 1].dev = &(abp2_devs[i]);

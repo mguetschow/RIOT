@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2017 Kees Bakker, SODAQ
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Kees Bakker, SODAQ
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -40,8 +37,8 @@ extern "C" {
 static const uart_conf_t uart_config[] = {
     {
         .dev      = &SERCOM5->USART,
-        .rx_pin   = GPIO_PIN(PB,3),  /* D0, RX Pin */
-        .tx_pin   = GPIO_PIN(PB,2),  /* D1, TX Pin */
+        .rx_pin   = GPIO_PIN(PB, 3),  /* D0, RX Pin */
+        .tx_pin   = GPIO_PIN(PB, 2),  /* D1, TX Pin */
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,
@@ -54,8 +51,8 @@ static const uart_conf_t uart_config[] = {
     },
     {
         .dev      = &SERCOM2->USART,
-        .rx_pin   = GPIO_PIN(PA,13),
-        .tx_pin   = GPIO_PIN(PA,12),
+        .rx_pin   = GPIO_PIN(PA, 13),
+        .tx_pin   = GPIO_PIN(PA, 12),
 #ifdef MODULE_PERIPH_UART_HW_FC
         .rts_pin  = GPIO_UNDEF,
         .cts_pin  = GPIO_UNDEF,

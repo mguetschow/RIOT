@@ -7,11 +7,6 @@ OPENOCD_ADAPTER_INIT ?= -c 'source [find interface/ftdi/$(OPENOCD_FTDI_ADAPTER).
 # default to SWD
 OPENOCD_TRANSPORT ?= swd
 
-# Add serial matching command, only if DEBUG_ADAPTER_ID was specified
-ifneq (,$(DEBUG_ADAPTER_ID))
-  OPENOCD_ADAPTER_INIT += -c 'ftdi_serial $(DEBUG_ADAPTER_ID)'
-endif
-
 ifeq (swd, $(OPENOCD_TRANSPORT))
   ifeq (tigard, $(OPENOCD_FTDI_ADAPTER))
     # Add dummy SWD_EN signal
@@ -34,6 +29,6 @@ ifeq (tigard,$(OPENOCD_FTDI_ADAPTER))
   # If the user provided a programmer serial, we also use that to detect the
   # TTY.
   ifneq (,$(SERIAL))
-    TTY_SELECT_CMD += --serial "$(SERIAL)"
+    TTY_BOARD_FILTER += --serial "$(SERIAL)"
   endif
 endif

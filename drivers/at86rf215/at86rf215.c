@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 ML!PA Consulting GmbH
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 ML!PA Consulting GmbH
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -226,6 +223,9 @@ void at86rf215_tx_done(at86rf215_t *dev)
     }
 
     at86rf215_reg_write(dev, dev->BBC->RG_AMCS, amcs);
+
+    /* re-enable reduced power consumption */
+    at86rf215_enable_rpc(dev);
 }
 
 static bool _tx_ongoing(at86rf215_t *dev)

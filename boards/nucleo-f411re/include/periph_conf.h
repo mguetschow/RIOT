@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2016 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -60,8 +57,8 @@ static const uart_conf_t uart_config[] = {
     {
         .dev        = USART2,
         .rcc_mask   = RCC_APB1ENR_USART2EN,
-        .rx_pin     = GPIO_PIN(PORT_A,3),
-        .tx_pin     = GPIO_PIN(PORT_A,2),
+        .rx_pin     = GPIO_PIN(PORT_A, 3),
+        .tx_pin     = GPIO_PIN(PORT_A, 2),
         .rx_af      = GPIO_AF7,
         .tx_af      = GPIO_AF7,
         .bus        = APB1,
@@ -117,7 +114,7 @@ static const pwm_conf_t pwm_config[] = {
     {
         .dev      = TIM2,
         .rcc_mask = RCC_APB1ENR_TIM2EN,
-        .chan     = { { .pin = GPIO_PIN(PORT_A, 15)         , .cc_chan = 0 },
+        .chan     = { { .pin = GPIO_PIN(PORT_A, 15),          .cc_chan = 0 },
                       { .pin = GPIO_PIN(PORT_B, 3)  /* D3 */, .cc_chan = 1 },
                       { .pin = GPIO_PIN(PORT_B, 10) /* D6 */, .cc_chan = 2 },
                       { .pin = GPIO_UNDEF,                    .cc_chan = 0 } },

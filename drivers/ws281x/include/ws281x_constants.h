@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Marian Buschsieweke
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Marian Buschsieweke
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -39,8 +36,12 @@ extern "C" {
  * @brief The high-times in nanoseconds.
  * @{
  */
-#define WS281X_T_DATA_ONE_NS            (650U)
-#define WS281X_T_DATA_ZERO_NS           (325U)
+#ifndef WS281X_T_DATA_ONE_NS
+#  define WS281X_T_DATA_ONE_NS          (650U)
+#endif
+#ifndef WS281X_T_DATA_ZERO_NS
+#  define WS281X_T_DATA_ZERO_NS         (325U)
+#endif
 /**@}*/
 
 /**
@@ -68,6 +69,10 @@ extern "C" {
  * @brief   Offset for the blue color component
  */
 #define WS281X_OFFSET_B                 (2U)
+/**
+ * @brief   Offset for the white color component (only for 4-byte variants)
+ */
+#define WS281X_OFFSET_W                 (3U)
 /**@}*/
 
 #ifdef __cplusplus

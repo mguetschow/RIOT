@@ -1,13 +1,10 @@
 /*
- * Copyright (C) 2014-2015 Freie Universität Berlin
- *               2015 Hamburg University of Applied Sciences
- *               2017-2020 Inria
- *               2017 OTA keys S.A.
- *               2021 Otto-von-Guericke-Universität Magdeburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2014-2015 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2015 Hamburg University of Applied Sciences
+ * SPDX-FileCopyrightText: 2017-2020 Inria
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-FileCopyrightText: 2021 Otto-von-Guericke-Universität Magdeburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -60,7 +57,7 @@
 
 #if defined(EXTI_PR_PR0)
 #  define EXTI_REG_PR           (EXTI->PR)
-#elif defined(EXTI_PR1_PIF0)
+#elif defined(EXTI_PR1_PIF0) || defined(EXTI_PR1_PR)
 #  define EXTI_REG_PR           (EXTI->PR1)
 #else
 #  define EXTI_REG_FPR          (EXTI->FPR1)
@@ -84,6 +81,9 @@
 #elif defined(RCC_APB3ENR_SYSCFGEN)
 #  define SYSFG_CLOCK           APB3
 #  define SYSFG_ENABLE_MASK     RCC_APB3ENR_SYSCFGEN
+#elif defined(RCC_APB4ENR_SYSCFGEN)
+#  define SYSFG_CLOCK          APB4
+#  define SYSFG_ENABLE_MASK     RCC_APB4ENR_SYSCFGEN
 #endif
 
 #if defined(EXTI_EXTICR1_EXTI0)

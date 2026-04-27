@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2014-2017 Eistec AB
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2014-2017 Eistec AB
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -93,7 +90,6 @@ void board_init(void)
 {
     int status;
 
-
     /* Initialize power control pins */
     power_pins_init();
 
@@ -108,7 +104,6 @@ void board_init(void)
 
     /* Turn on AVDD for reading voltages */
     gpio_set(MULLE_POWER_AVDD);
-
 
     /* NVRAM requires xtimer for timing */
     ztimer_init();

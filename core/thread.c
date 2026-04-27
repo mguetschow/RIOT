@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2013 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2013 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -35,10 +32,14 @@
 #define ENABLE_DEBUG 0
 #include "debug.h"
 
-#if defined(HAVE_VALGRIND_H)
-#  include <valgrind.h>
-#elif defined(HAVE_VALGRIND_VALGRIND_H)
-#  include <valgrind/valgrind.h>
+#if defined(HAVE_VALGRIND)
+/* __has_include() will only be reached on native and only when valgrind is
+ * enabled, so we do not limit compatibility with embedded toolchains here */
+#  if __has_include(<valgrind/valgrind.h>)
+#    include <valgrind/valgrind.h>
+#  else
+#    include <valgrind.h>
+#  endif
 #else
 #  define   VALGRIND_DISABLE_ERROR_REPORTING    (void)0
 #  define   VALGRIND_ENABLE_ERROR_REPORTING     (void)0

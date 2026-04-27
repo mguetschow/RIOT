@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2014 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2014 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -33,7 +30,10 @@ extern "C" {
 #define CC110X_PARAM_CS         GPIO_PIN(PORT_B, 12)    /**< CS pin of CC1101 */
 #define CC110X_PARAM_GDO0       GPIO_PIN(PORT_C, 4)     /**< GDO0 pin of CC1101 */
 #define CC110X_PARAM_GDO2       GPIO_PIN(PORT_C, 5)     /**< GDO2 pin of CC1101 */
-#define CC110X_PARAM_SPI_CLOCK  SPI_CLK_1MHZ            /**< SPI clock (reduced to work around hw bug) */
+/**
+ * @brief SPI clock (reduced to work around hw bug)
+ */
+#define CC110X_PARAM_SPI_CLOCK  SPI_CLK_1MHZ
 /** @} */
 
 /**

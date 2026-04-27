@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2017 Freie Universität Berlin
- *               2017 OTA keys S.A.
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -32,6 +29,17 @@
 #elif defined(CPU_FAM_STM32U5)
 #define REG_PWR_CR          DBPR
 #define BIT_CR_DBP          PWR_DBPR_DBP
+#elif defined(CPU_FAM_STM32H7)
+#  if defined(PWR_CR1_DBP)
+#    define REG_PWR_CR          CR1
+#    define BIT_CR_DBP          PWR_CR1_DBP
+#  elif defined(PWR_DBPR_DBP)
+#    define REG_PWR_CR          DBPR
+#    define BIT_CR_DBP          PWR_DBPR_DBP
+#  elif defined(PWR_CR_DBP)
+#    define REG_PWR_CR          CR
+#    define BIT_CR_DBP          PWR_CR_DBP
+#endif
 #else
 #define REG_PWR_CR          CR
 #define BIT_CR_DBP          PWR_CR_DBP

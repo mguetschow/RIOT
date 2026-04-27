@@ -1,12 +1,9 @@
 /*
- * Copyright (C) 2016,2017,2018 Kees Bakker, SODAQ
- *               2017 George Psimenos
- *               2018 Steffen Robertz
- *               2022 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016-2018 Kees Bakker, SODAQ
+ * SPDX-FileCopyrightText: 2017 George Psimenos
+ * SPDX-FileCopyrightText: 2018 Steffen Robertz
+ * SPDX-FileCopyrightText: 2022 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -209,7 +206,7 @@ int sht2x_read_ident(const sht2x_t *dev, uint8_t * buffer, size_t buflen)
     DEBUG("[SHT2x] ident (1): %02x %02x %02x %02x\n", data1[4], data1[5], data1[6], data1[7]);
     for (size_t ix = 0; ix < sizeof(data1); ix += 2) {
         if (sht2x_checkcrc(&data1[ix], 1, data1[ix + 1]) != 0) {
-            DEBUG("[SHT2x] checksum error first (ix=%d)\n", ix);
+            DEBUG("[SHT2x] checksum error first (ix=%zu)\n", ix);
             return SHT2X_ERR_CRC;
         }
     }
@@ -225,7 +222,7 @@ int sht2x_read_ident(const sht2x_t *dev, uint8_t * buffer, size_t buflen)
     DEBUG("[SHT2x] ident (2): %02x %02x %02x\n", data2[3], data2[4], data2[5]);
     for (size_t ix = 0; ix < sizeof(data2); ix += 3) {
         if (sht2x_checkcrc(&data2[ix], 2, data2[ix + 2]) != 0) {
-            DEBUG("[SHT2x] checksum error, second (ix=%d)\n", ix);
+            DEBUG("[SHT2x] checksum error, second (ix=%zu)\n", ix);
             return SHT2X_ERR_CRC;
         }
     }

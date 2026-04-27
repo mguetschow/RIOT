@@ -1,11 +1,8 @@
 /*
- * Copyright 2015 Ludwig Knüpfer,
- *           2015 Christian Mehlis
- *           2016-2017 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Ludwig Knüpfer
+ * SPDX-FileCopyrightText: 2015 Christian Mehlis
+ * SPDX-FileCopyrightText: 2016-2017 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -38,17 +35,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/**
- * @brief       Possible return codes
- *
- * @deprecated  The functions use errno codes instead now
- */
-enum {
-    DHT_OK      =  0,           /**< all good */
-    DHT_NOCSUM  = -EIO,         /**< checksum error */
-    DHT_TIMEOUT = -ETIMEDOUT,   /**< communication timed out */
-};
 
 /**
  * @brief   Data type for storing DHT sensor readings

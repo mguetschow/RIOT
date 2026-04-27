@@ -63,13 +63,17 @@ void saul_init_devs(void)
         extern void auto_init_adcxx1c(void);
         auto_init_adcxx1c();
     }
-    if (IS_USED(MODULE_ADS101X)) {
-        extern void auto_init_ads101x(void);
-        auto_init_ads101x();
+    if (IS_USED(MODULE_ADS1X1X)) {
+        extern void auto_init_ads1x1x(void);
+        auto_init_ads1x1x();
     }
     if (IS_USED(MODULE_ADXL345)) {
         extern void auto_init_adxl345(void);
         auto_init_adxl345();
+    }
+    if (IS_USED(MODULE_AMG88XX)) {
+        extern void auto_init_amg88xx(void);
+        auto_init_amg88xx();
     }
     if (IS_USED(MODULE_APDS99XX)) {
         extern void auto_init_apds99xx(void);
@@ -118,6 +122,10 @@ void saul_init_devs(void)
     if (IS_USED(MODULE_GP2Y10XX)) {
         extern void auto_init_gp2y10xx(void);
         auto_init_gp2y10xx();
+    }
+    if (IS_USED(MODULE_GP8XXX)) {
+        extern void auto_init_gp8xxx(void);
+        auto_init_gp8xxx();
     }
     if (IS_USED(MODULE_GROVE_LEDBAR)) {
         extern void auto_init_grove_ledbar(void);
@@ -255,6 +263,10 @@ void saul_init_devs(void)
         extern void auto_init_opt3001(void);
         auto_init_opt3001();
     }
+    if (IS_USED(MODULE_PAA5100JE)) {
+        extern void auto_init_paa5100je(void);
+        auto_init_paa5100je();
+    }
     if (IS_USED(MODULE_PCA9685)) {
         extern void auto_init_pca9685(void);
         auto_init_pca9685();
@@ -278,6 +290,10 @@ void saul_init_devs(void)
     if (IS_USED(MODULE_QMC5883L)) {
         extern void auto_init_qmc5883l(void);
         auto_init_qmc5883l();
+    }
+    if (IS_USED(MODULE_QMI8658)) {
+        extern void auto_init_qmi8658(void);
+        auto_init_qmi8658();
     }
     if (IS_USED(MODULE_SCD30)) {
         extern void auto_init_scd30(void);

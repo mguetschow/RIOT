@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2017 Hamburg University of Applied Sciences
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Hamburg University of Applied Sciences
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -101,6 +98,7 @@ int soft_spi_init_cs(soft_spi_t bus, soft_spi_cs_t cs)
     return SOFT_SPI_OK;
 }
 
+MAYBE_UNUSED
 static inline int soft_spi_mode_is_valid(soft_spi_mode_t mode)
 {
     if ((mode != SOFT_SPI_MODE_0) && (mode != SOFT_SPI_MODE_1) &&

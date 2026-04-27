@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2014-2017 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2014-2017 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -24,7 +21,7 @@
  * address and 8-bit register addresses and using a RESTART condition (CAUTION:
  * this example does not check any return values...):
  *
- * @code{c}
+ * ```c
  * // before accessing the bus, we need to acquire it
  * i2c_acquire(dev);
  * // next we write the register address, but create no STOP condition when done
@@ -33,12 +30,12 @@
  * i2c_read_byte(dev, device_addr, &reg_value, I2C_ADDR10);
  * // finally we have to release the bus
  * i2c_release(dev);
- * @endcode
+ * ```
  *
  * Example for writing a 16-bit register with 16-bit register addressing and
  * 7-bit device addressing:
  *
- * @code{c}
+ * ```c
  * // first, acquire the shared bus again
  * i2c_acquire(dev);
  * // write the 16-bit register address to the device and prevent STOP condition
@@ -47,8 +44,7 @@
  * i2c_write_bytes(dev, device_addr, reg_data, 2, 0);
  * // and finally free the bus again
  * i2c_release(dev);
- * @endcode
- *
+ * ```
  *
  * @section   sec_i2c_pull Pull Resistors
  *
@@ -62,16 +58,7 @@
  * I2C bus lines.
  *
  * The minimum and maximum resistances are computed by:
- * \f{eqnarray*}{
- * R_{min} &=& \frac{V_{DD} - V_{OL(max)}} {I_{OL}}\\
- * R_{max} &=& \frac{t_r} {(0.8473 \cdot C_b)}
- * \f}<br>
- * where:<br>
- * \f$ V_{DD} =\f$ Supply voltage,
- * \f$ V_{OL(max)} =\f$ Low level voltage,
- * \f$ I_{OL} =\f$ Low level output current,
- * \f$ t_r =\f$ Signal rise time,
- * \f$ C_b =\f$ Bus capacitance <br>
+ * @image html periph_i2c_bus_equations.svg
  * <br>The pull-up resistors depend on the bus speed.
  * Some typical values are:<br>
  * Normal mode:       10k&Omega;<br>
@@ -81,6 +68,30 @@
  * For more details refer to section 7.1 in:<br>
  * http://www.nxp.com/documents/user_manual/UM10204.pdf
  *
+ * @section sec_i2c_defaultconf Default Configuration and Dealing with Multiple I2C Buses
+ *
+ * Many advanced microcontrollers feature multiple I2C buses and some devices,
+ * such as the Nordic Semiconductor nRF52 family, even allow arbitrary pin
+ * assignments for the peripherals.
+ *
+ * RIOT boards provide sane defaults for bus and pin assignments on Development
+ * Boards. The first I2C controller `I2C_DEV(0)` is assigned to
+ * the I2C pins marked on the board. Often that corresponds to the
+ * Arduino headers or other manufacturer standardized pinouts.
+ *
+ * If there are additional devices such as a display, memory, sensor,
+ * etc. present on the board, a higher number I2C controller will be selected,
+ * e.g. `I2C_DEV(1)` or `I2C_DEV(2)`.
+ * The exact assignment depends on the number of I2C controllers and
+ * organization of peripherals as well as the capabilities of the individual
+ * controller. Some controllers support faster transfer rate or special
+ * operating modes. More details are documented in the
+ * `periph_conf.h` file of the specific board.
+ *
+ * If you wish to modify the default configuration for your application,
+ * take a look at the
+ * [guides page](https://doc.riot-os.org/advanced_tutorials/creating_application/#modifying-board-defaults-of-peripherals)
+ * about creating applications.
  *
  * @section   sec_i2c_pm (Low-) power implications
  *

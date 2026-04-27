@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -54,11 +51,11 @@ extern "C" {
  * @name    Backlight control
  * @{
  */
-#define BACKLIGHT_PIN          GPIO_PIN(PA, 1)                  /**< Backlight pin */
-#define BACKLIGHT_PORT         PORT->Group[PA]                  /**< Backlight pin port */
-#define BACKLIGHT_MASK         (1 << 1)                         /**< Backlight pin mask */
-#define BACKLIGHT_ON           (BACKLIGHT_PORT.OUTSET.reg = BACKLIGHT_MASK) /**< Turn backlight on */
-#define BACKLIGHT_OFF          (BACKLIGHT_PORT.OUTCLR.reg = BACKLIGHT_MASK) /**< Turn backlight off */
+#define BACKLIGHT_PIN     GPIO_PIN(PA, 1)                  /**< Backlight pin */
+#define BACKLIGHT_PORT    PORT->Group[PA]                  /**< Backlight pin port */
+#define BACKLIGHT_MASK    (1 << 1)                         /**< Backlight pin mask */
+#define BACKLIGHT_ON      (BACKLIGHT_PORT.OUTSET.reg = BACKLIGHT_MASK) /**< Turn backlight on */
+#define BACKLIGHT_OFF     (BACKLIGHT_PORT.OUTCLR.reg = BACKLIGHT_MASK) /**< Turn backlight off */
 /** @} */
 
 /**
@@ -71,7 +68,11 @@ extern "C" {
 #define ST77XX_PARAM_DCX        GPIO_PIN(PB, 5)                 /**< DCX pin */
 #define ST77XX_PARAM_RST        GPIO_PIN(PA, 0)                 /**< Reset pin */
 #define ST77XX_PARAM_NUM_LINES  (160U)                          /**< Number of screen lines */
-#define ST77XX_PARAM_RGB_CHANNELS   (128U)                      /**< Number of screen rgb channel (height) */
+
+/**
+ * @brief Number of screen rgb channel (height)
+ */
+#define ST77XX_PARAM_RGB_CHANNELS   (128U)
 #define ST77XX_PARAM_RGB        (1)                             /**< RGB configuration */
 #define ST77XX_PARAM_INVERTED   (0)                             /**< Inversion configuration */
 #define ST77XX_PARAM_ROTATION   ST77XX_ROTATION_90              /**< Rotation mode */
@@ -83,8 +84,13 @@ extern "C" {
  * @name    Neopixel LEDs (not supported yet)
  * @{
  */
-#define WS281X_PARAM_PIN        (GPIO_PIN(PA, 15))              /**< GPIO pin connected to the data pin of the first LED */
+
+/**
+ * @brief GPIO pin connected to the data pin of the first LED
+ */
+#define WS281X_PARAM_PIN        (GPIO_PIN(PA, 15))
 #define WS281X_PARAM_NUMOF      (5U)                            /**< Number of LEDs chained */
+
 /** @} */
 
 /**
@@ -109,6 +115,8 @@ extern "C" {
 #define XTIMER_WIDTH                (32)                        /**< Default timer is 32bit width */
 #define XTIMER_HZ                   (1000000ul)                 /**< Default timer runs at 1MHz */
 /** @} */
+
+#define BOOTLOADER_UF2    1     /**< This board uses the UF2 bootloader */
 
 #ifdef __cplusplus
 }

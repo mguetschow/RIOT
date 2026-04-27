@@ -5,7 +5,7 @@
 # When the docker image is updated, checks at
 # dist/tools/buildsystem_sanity_check/check.sh start complaining in CI, and
 # provide the latest values to verify and fill in.
-DOCKER_TESTED_IMAGE_REPO_DIGEST := 21c416fbbb94a99c3d9c76341baf5a9740608b1d1af89967127c7a171248fd7b
+DOCKER_TESTED_IMAGE_REPO_DIGEST := 028d9267e715e992d9b47bb8738685c6cc96b1a3bc3924489e7e543a333e8486
 
 DOCKER_PULL_IDENTIFIER := docker.io/riot/riotbuild@sha256:$(DOCKER_TESTED_IMAGE_REPO_DIGEST)
 export DOCKER_IMAGE ?= $(DOCKER_PULL_IDENTIFIER)
@@ -19,13 +19,20 @@ DEPS_FOR_RUNNING_DOCKER :=
 DOCKER ?= docker
 
 # List of Docker-enabled make goals
-export DOCKER_MAKECMDGOALS_POSSIBLE = \
+DOCKER_MAKECMDGOALS_POSSIBLE := \
   all \
   scan-build \
   scan-build-analyze \
   tests-% \
   #
-export DOCKER_MAKECMDGOALS = $(filter $(DOCKER_MAKECMDGOALS_POSSIBLE),$(MAKECMDGOALS))
+
+# On native, we also can run the test in docker
+ifneq (, $(filter native%,$(BOARD)))
+  DOCKER_MAKECMDGOALS_POSSIBLE += test
+endif
+
+export DOCKER_MAKECMDGOALS_POSSIBLE
+export DOCKER_MAKECMDGOALS := $(filter $(DOCKER_MAKECMDGOALS_POSSIBLE),$(MAKECMDGOALS))
 
 # Docker creates the files .dockerinit and .dockerenv in the root directory of
 # the container, we check for the files to determine if we are inside a container.
@@ -92,7 +99,7 @@ export DOCKER_ENV_VARS += \
 # List of all exported environment variables that shall be passed on to the
 # Docker container since they might have been set through the command line
 # and environment.
-# Their origin cannot be checked since they are often redefined or overriden
+# Their origin cannot be checked since they are often redefined or overridden
 # in Makefile/Makefile.include, etc. and their origin is changed to file
 export DOCKER_ENV_VARS_ALWAYS += \
   DISABLE_MODULE \
@@ -148,10 +155,10 @@ DOCKER_RUN_FLAGS += --platform linux/amd64
 # allow setting make args from command line like '-j'
 DOCKER_MAKE_ARGS ?=
 
-# Resolve symlink of /etc/localtime to its real path
-# This is a workaround for docker on macOS, for more information see:
-# https://github.com/docker/for-mac/issues/2396
-ETC_LOCALTIME = $(realpath /etc/localtime)
+# Extract timezone name from /etc/localtime, for passing to the container. This
+# avoids mounting /etc/localtime which fails for some container runtimes under
+# macOS.
+HOST_TIMEZONE = $(shell readlink /etc/localtime 2>/dev/null | sed 's|.*/zoneinfo/||')
 
 # Fetch the number of jobs from the MAKEFLAGS
 # With $MAKE_VERSION < 4.2, the amount of parallelism is not available in
@@ -184,7 +191,7 @@ DOCKER_MAKE_ARGS += $(DOCKER_MAKE_JOBS)
 #   the variable is mapped to a path inside `DOCKER_RIOTBASE` in the container.
 #
 # * if the directory is not contained in the `RIOT` repository,
-#   the directory must be mounted in the countainer.
+#   the directory must be mounted in the container.
 #   The variable and directory are mapped to a path outside `DOCKER_RIOTBASE`.
 #   Some variables have hardwritten mapping directories (`RIOTCPU` for example),
 #   and other have a mapping directory based on their directory name.
@@ -207,7 +214,7 @@ define dir_is_outside_riotbase
 $(filter $(abspath $1)/,$(patsubst $(RIOTBASE)/%,%,$(abspath $1)/))
 endef
 
-# Mapping of directores inside docker
+# Mapping of directories inside docker
 #
 # Return the path of directories from the host within the container
 #
@@ -283,21 +290,21 @@ DOCKER_APPDIR = $(DOCKER_RIOTPROJECT)/$(BUILDRELPATH)
 
 
 # Directory mapping in docker and directories environment variable configuration
-DOCKER_VOLUMES_AND_ENV += $(call docker_volume,$(ETC_LOCALTIME),/etc/localtime,ro)
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume,$(RIOTBASE),$(DOCKER_RIOTBASE))
 # Selective components of Cargo to ensure crates are not re-downloaded (and
 # subsequently rebuilt) on every run. Not using all of ~/.cargo as ~/.cargo/bin
 # would be run by Cargo and that'd be very weird.
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume,$(HOME)/.cargo/registry,$(DOCKER_BUILD_ROOT)/.cargo/registry)
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume,$(HOME)/.cargo/git,$(DOCKER_BUILD_ROOT)/.cargo/git)
+DOCKER_VOLUMES_AND_ENV += -e 'TZ=$(HOST_TIMEZONE)'
 DOCKER_VOLUMES_AND_ENV += -e 'RIOTBASE=$(DOCKER_RIOTBASE)'
 DOCKER_VOLUMES_AND_ENV += -e 'CCACHE_BASEDIR=$(DOCKER_RIOTBASE)'
 
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,BUILD_DIR,,build)
 
-# Prevent recursive invocation of docker by explicitely disabling docker via env variable,
+# Prevent recursive invocation of docker by explicitly disabling docker via env variable,
 # overwriting potential default in application Makefile
-DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,BUILD_IN_DOCKER,,0)
+DOCKER_VOLUMES_AND_ENV += -e 'BUILD_IN_DOCKER=0'
 
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,RIOTPROJECT,,riotproject)
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,RIOTCPU,,riotcpu)
@@ -305,6 +312,7 @@ DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,RIOTBOARD,,riotboard)
 DOCKER_VOLUMES_AND_ENV += $(call docker_volume_and_env,RIOTMAKE,,riotmake)
 
 # Add GIT_CACHE_DIR if the directory exists
+GIT_CACHE_DIR ?= $(HOME)/.gitcache
 DOCKER_VOLUMES_AND_ENV += $(if $(wildcard $(GIT_CACHE_DIR)),$(call docker_volume,$(GIT_CACHE_DIR),$(DOCKER_BUILD_ROOT)/gitcache))
 DOCKER_VOLUMES_AND_ENV += $(if $(wildcard $(GIT_CACHE_DIR)),-e 'GIT_CACHE_DIR=$(DOCKER_BUILD_ROOT)/gitcache')
 
@@ -337,8 +345,10 @@ DOCKER_OVERRIDE_CMDLINE += $(call docker_cmdline_mapping,EXTERNAL_BOARD_DIRS,$(D
 # would lead to both being mapped to '$(DOCKER_BUILD_ROOT)/external/name'
 _mounted_dirs = $(foreach d,$(EXTERNAL_MODULE_DIRS),$(if $(call dir_is_outside_riotbase,$(d)),$(d)))
 ifneq ($(words $(sort $(notdir $(_mounted_dirs)))),$(words $(sort $(_mounted_dirs))))
-  $(warning Mounted EXTERNAL_MODULE_DIRS: $(_mounted_dirs))
-  $(error Mapping EXTERNAL_MODULE_DIRS in docker is not supported for directories with the same name)
+  ifeq (1, $(BUILD_IN_DOCKER))
+    $(warning Mounted EXTERNAL_MODULE_DIRS: $(_mounted_dirs))
+    $(error Mapping EXTERNAL_MODULE_DIRS in docker is not supported for directories with the same name)
+  endif
 endif
 
 # Handle worktree by mounting the git common dir in the same location

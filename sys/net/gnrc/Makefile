@@ -43,29 +43,23 @@ endif
 ifneq (,$(filter gnrc_netapi,$(USEMODULE)))
   DIRS += netapi
 endif
+ifneq (,$(filter gnrc_netapi_notify,$(USEMODULE)))
+  DIRS += netapi/notify
+endif
 ifneq (,$(filter gnrc_netif gnrc_netif_%,$(USEMODULE)))
     DIRS += netif
 endif
 ifneq (,$(filter gnrc_netreg,$(USEMODULE)))
   DIRS += netreg
 endif
-ifneq (,$(filter gnrc_mac,$(USEMODULE)))
-  DIRS += link_layer/mac
-endif
 ifneq (,$(filter gnrc_pkt,$(USEMODULE)))
   DIRS += pkt
-endif
-ifneq (,$(filter gnrc_lwmac,$(USEMODULE)))
-  DIRS += link_layer/lwmac
 endif
 ifneq (,$(filter gnrc_pktbuf_malloc,$(USEMODULE)))
     DIRS += pktbuf_malloc
 endif
 ifneq (,$(filter gnrc_lorawan,$(USEMODULE)))
     DIRS += link_layer/lorawan
-endif
-ifneq (,$(filter gnrc_gomach,$(USEMODULE)))
-    DIRS += link_layer/gomach
 endif
 ifneq (,$(filter gnrc_pktbuf_static,$(USEMODULE)))
   DIRS += pktbuf_static
@@ -78,6 +72,9 @@ ifneq (,$(filter gnrc_priority_pktqueue,$(USEMODULE)))
 endif
 ifneq (,$(filter gnrc_pktdump,$(USEMODULE)))
   DIRS += pktdump
+endif
+ifneq (,$(filter gnrc_pktshark,$(USEMODULE)))
+  DIRS += pktshark
 endif
 ifneq (,$(filter gnrc_rpl,$(USEMODULE)))
   DIRS += routing/rpl

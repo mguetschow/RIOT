@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019-2022 Mesotic SAS
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019-2022 Mesotic SAS
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -23,6 +20,7 @@
 #include <string.h>
 
 #include "board.h"
+#include "test_utils/expect.h"
 
 #if defined(MODULE_MTD_EMULATED)
 
@@ -161,7 +159,7 @@ int main(void)
 
     /* Get driver context */
     usbdev_t *usbdev = usbdev_get_ctx(0);
-    assert(usbdev);
+    expect(usbdev);
 
     usbus_t *usbus_auto_init_get(void);
     usbus = usbus_auto_init_get();

@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -94,7 +91,7 @@ typedef struct {
     /**
      * @brief   Invert the display device colors
      *
-     * @param[in] dev       Network device descriptor
+     * @param[in] dev       Pointer to the display device
      * @param[in] invert    Invert mode (true if invert, false otherwise)
      */
     void (*set_invert)(const disp_dev_t *dev, bool invert);

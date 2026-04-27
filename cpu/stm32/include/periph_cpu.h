@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2016 Freie Universität Berlin
- *               2017 OTA keys S.A.
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -39,6 +36,8 @@
 #include "periph/f7/periph_cpu.h"
 #elif defined(CPU_FAM_STM32G0)
 #include "periph/g0/periph_cpu.h"
+#elif defined(CPU_FAM_STM32H7)
+#include "periph/h7/periph_cpu.h"
 #elif defined(CPU_FAM_STM32C0)
 #include "periph/c0/periph_cpu.h"
 #elif defined(CPU_FAM_STM32G4)
@@ -175,6 +174,7 @@ typedef struct {
 #else
 #define USBDEV_NUM_ENDPOINTS            8
 #endif
+/** @} */
 
 /* unify names across STM32 families */
 #ifdef SPI_CR1_CPHA_Msk

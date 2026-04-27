@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015-2020 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -86,9 +83,10 @@ static const i2c_conf_t i2c_config[] = {
         .sda_pin = GPIO_PIN(PD, 6),
         .scl_pin = GPIO_PIN(PD, 7),
         .loc = I2C_ROUTE_LOCATION_LOC1,
+        .speed = I2C_SPEED_NORMAL,
         .cmu = cmuClock_I2C0,
         .irq = I2C0_IRQn,
-        .speed = I2C_SPEED_NORMAL
+        .use_internal_pull_ups = true
     }
 };
 

@@ -5,20 +5,26 @@ code_folder: examples/guides/creating_project/
 ---
 import Contact from '@components/contact.astro';
 import GitSetup from '@components/gitsetup.mdx';
+import FileTree from '@components/FileTree.astro';
 
 Now that we have played around with the examples and have a basic understanding of how to use RIOT,
 let's create a new project from scratch.
 We will create a simple hello world program that will print "Hello World!" to the console.
 
-Lets start with the basic git setup,
-if you already have a git repository set up,
-you can skip to the next section.
+:::note
+This is a beginner tutorial, if you are looking for more advanced information
+about RIOT applications, take a look at
+[Creating an Application](/advanced_tutorials/creating_application).
+:::
+
+Lets start with the basic git setup, if you already have a git repository set
+up, you can skip to the next section.
 
 ## Step 1: The Basics of Git and Submodules
 
 <GitSetup />
 
-## Step 2: Creating our hello world program
+## Step 2: Creating our Hello World Program
 
 Now that we have added RIOT as a submodule to our project,
 we can start writing our hello world program.
@@ -52,10 +58,11 @@ we create a new file called `main.c` and add the following code:
  * of the program. A return value of 0 indicates that the program has finished
  * successfully.
  */
-int main(void) {
-  puts("Hello World!");
+int main(void)
+{
+    puts("Hello World!");
 
-  return 0;
+    return 0;
 }
 ```
 
@@ -95,10 +102,19 @@ include $(RIOTBASE)/Makefile.include
 
 ![The Makefile in Visual Studio Code](img/create_project/04_makefile.png)
 
+By now, your project directory should look like this:
+
+<FileTree>
+- hello_world
+    - RIOT/
+    - **Makefile**
+    - **main.c**
+</FileTree>
+
 Congratulations! You have now created a new project with a simple hello world program.
 In the next step, we will build and run our program just like we did in the "Getting Started" guide.
 
-## Step 4: Building and running the program
+## Step 4: Building and Running the Program
 
 <Contact />
 
@@ -172,6 +188,16 @@ bin/
 *.a
 *.out
 ```
+
+The `.gitignore` should sit in the root of your project directory, like this:
+
+<FileTree>
+- hello_world
+    - RIOT/
+    - Makefile
+    - main.c
+    - **.gitignore**
+</FileTree>
 :::
 
 ## Conclusion

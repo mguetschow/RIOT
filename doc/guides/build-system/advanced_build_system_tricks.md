@@ -7,7 +7,7 @@ This page describes some build systems tricks that can help developers but are n
 
 They are low level commands that should not be taken as part of a stable API but better have a documentation than only having a description in the build system code.
 
-## Customize the build system
+## Customize the Build System
 
 - `RIOT_MAKEFILES_GLOBAL_PRE`: files parsed before the body of `$RIOTBASE/Makefile.include`
 - `RIOT_MAKEFILES_GLOBAL_POST`: files parsed after the body of `$RIOTBASE/Makefile.include`
@@ -23,7 +23,115 @@ You can configure your own files that will be parsed by the build system main `M
 - Define your custom targets
 - Override default targets
 
-## Analyze dependency resolution
+## Speed-up Builds with ccache
+
+[`ccache`](https://ccache.samba.org/) is a compiler cache. It speeds up recompilation by caching previous compilations and detecting when the same compilation is being done again.
+
+Usually, the initial build takes a little (5% - 20%) longer, but repeated builds are up to ten times faster.
+Using `ccache` is safe, as `ccache` tries very hard to not mess up things and falls back to a normal compile if it cannot ensure correct output.
+
+There's one drawback: without further tweaking, `gcc` stops emitting colored output.
+
+### Setup
+
+- Install using the package manager of your distribution, e.g., on Ubuntu or Debian:
+
+```shell
+sudo apt-get install ccache
+```
+
+- Set `CCACHE` variable to `ccache`:
+
+```shell
+export CCACHE=ccache
+```
+
+- (Optionally) add the above export line to your `~/.profile`
+
+### Result
+
+Build without `ccache`:
+
+```sh
+[kaspar@booze default (master)]$ time BOARD=samr21-xpro make clean all
+Building application "default" for "samr21-xpro" with MCU "samd21".
+
+[...]
+
+    text    data     bss     dec     hex filename
+  37016     180    6008   43204    a8c4 /home/kaspar/src/riot/examples/basic/default/bin/samr21-xpro/default.elf
+
+real    0m12.321s
+user    0m10.317s
+sys     0m1.170s
+[kaspar@booze default (master)]$
+```
+
+First build with `ccache` enabled:
+
+```sh
+[kaspar@booze default (master)]$ time BOARD=samr21-xpro make clean all
+Building application "default" for "samr21-xpro" with MCU "samd21".
+
+[...]
+
+text    data     bss     dec     hex filename
+37016     180    6008   43204    a8c4 /home/kaspar/src/riot/examples/basic/default/bin/samr21-xpro/default.elf
+
+real    0m15.462s
+user    0m12.410s
+sys     0m1.597s
+[kaspar@booze default (master)]$
+```
+
+Subsequent build with `ccache` enabled:
+
+```sh
+[kaspar@booze default (master)]$ time BOARD=samr21-xpro make clean all
+Building application "default" for "samr21-xpro" with MCU "samd21".
+
+[...]
+
+    text    data     bss     dec     hex filename
+  37016     180    6008   43204    a8c4 /home/kaspar/src/riot/examples/basic/default/bin/samr21-xpro/default.elf
+
+real    0m2.157s
+user    0m1.213s
+sys     0m0.327s
+[kaspar@booze default (master)]$
+```
+
+## Speed-up Builds with git-cache-rs
+
+Some architectures and examples use code from external sources, such as vendor
+header files or SDKs. These repositories often have a download size which can
+slow down the initial build of a RIOT application, depending on your
+internet connection.
+
+To avoid downloading the full archive for each fresh build, a caching script
+was used called `git-cache`. This script has been deprecated in Release 2026.04
+and will be removed in favor of
+[`git-cache-rs`](https://github.com/kaspar030/git-cache-rs), which is
+implemented in Rust, offers more feature and is still under active development
+and maintenance.
+
+Please note that many popular Linux distributions provide very old Rust
+versions in their repositories. Therefore, it is
+recommended and easiest to use [**rustup**, installed as described
+on its project website].
+
+You can then proceed to install `git-cache-rs` by executing
+```sh
+cargo install git-cache
+```
+
+If you used RIOT's built-in `git-cache` previously, you can free some hard
+drive space by clearing the `~/.gitcache` folder or remove it entirely.
+`git-cache-rs` will create a new one.
+
+[**rustup**, installed as described on its project website]: https://rustup.rs/
+
+## Analyze Dependency Resolution
 
 When refactoring dependency handling or modifying variables used for dependency resolution, one may want to evaluate the impact on the existing applications. This describe some debug targets to dump variables used during dependency resolution.
 
@@ -45,7 +153,7 @@ For more configuration and usage details, see in the file defining the targets `
 
 To do a repository wide analysis, you can use the script `dist/tools/buildsystem_sanity_check/save_all_dependencies_resolution_variables.sh` that will generate the output for all boards and applications. It currently take around 2 hours on an 8 cores machine with ssd.
 
-## Generate Makefile.ci content
+## Generate Makefile.ci Content
 
 Most applications and tests include a `Makefile.ci` to indicate which boards cannot compile the application or test. The content for these files can be generated via the script in:
 
@@ -58,6 +166,33 @@ This will compile and link the application for every board available and record 
 ## Out of Tree Cache Directory
 
 By exporting the `BUILD_DIR` environment variable, a custom build / clone cache directory can be created. This can be particularly useful when working with multiple git work trees or clones of the RIOT repository.
+
+## Comparing Build Sizes
+
+There is a make target for build size comparison. It will automatically check
+all the boards compiled in the `NEWBIN` and `OLDBIN` and compare them.
+For boards that do not have a complementary partner, a warning is generated.
+You can use it like that:
+
+```sh
+$ cd RIOT/test/test_something
+
+$ git checkout master
+$ BINDIRBASE=master-bin BOARD=native64 make all
+
+$ git checkout my-branch
+$ BINDIRBASE=my-branch-bin BOARD=native64 make all
+
+$ OLDBIN=master-bin NEWBIN=my-branch-bin make info-buildsizes-diff
+text    data    bss     dec     BOARD/BINDIRBASE
+
+0       0       0       0       native64    **← this line contains the diff**
+57356   1532    96769   155657  master-bin
+57356   1532    96769   155657  my-branch-bin
+...
+```
+
+Check it out, the output contains colors. ;)
 
 ## RIOT-aware Completion in zsh
 

@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2020 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -441,3 +438,60 @@ int ds3231_disable_bat(const ds3231_t *dev)
 {
     return _clrset(dev, REG_CTRL, 0, CTRL_EOSC, 1, 1);
 }
+
+#ifdef MODULE_WALLTIME_IMPL_DS3231
+#include "ds3231_params.h"
+#include "walltime.h"
+
+static ds3231_t walltime_dev;
+static bool _init_done;
+
+void walltime_impl_init(void)
+{
+    _init_done = !ds3231_init(&walltime_dev, &ds3231_params[0]);
+}
+
+int walltime_impl_get(struct tm *time, uint16_t *ms)
+{
+    if (!_init_done) {
+        return -ENODEV;
+    }
+
+    *ms = 0;
+    return ds3231_get_time(&walltime_dev, time);
+}
+
+int walltime_impl_set(struct tm *time)
+{
+    if (!_init_done) {
+        return -ENODEV;
+    }
+    return ds3231_set_time(&walltime_dev, time);
+}
+
+#  ifdef MODULE_DS3231_INT
+int walltime_impl_alarm_set(struct tm *time, walltime_alarm_cb_t cb, void *arg)
+{
+    if (!_init_done) {
+        return -ENODEV;
+    }
+
+    if (!cb) {
+        return ds3231_toggle_alarm_1(&walltime_dev, false);
+    }
+
+    int res = ds3231_set_alarm_1(&walltime_dev, time, DS3231_AL1_TRIG_D_H_M_S);
+    if (res) {
+        return res;
+    }
+
+    /* clear stale interrupt flag */
+    uint8_t status;
+    _read(&walltime_dev, REG_STATUS, &status, 1, 1, 0);
+    status &= ~STAT_A1F;
+    _write(&walltime_dev, REG_STATUS, &status, 1, 0, 1);
+
+    return gpio_init_int(walltime_dev.int_pin, GPIO_IN, GPIO_FALLING, cb, arg);
+}
+#  endif /* MODULE_DS3231_INT */
+#endif /* MODULE_WALLTIME_IMPL_DS3231 */

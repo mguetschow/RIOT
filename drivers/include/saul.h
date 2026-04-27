@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2015 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -101,7 +98,9 @@ enum {
     SAUL_ACT_ID_MOTOR,                /**< actuator: motor */
     SAUL_ACT_ID_SWITCH,               /**< actuator: simple on/off switch */
     SAUL_ACT_ID_DIMMER,               /**< actuator: dimmable switch */
-    SAUL_ACT_NUMOF                  /**< Number of actuators supported */
+    SAUL_ACT_ID_VOLTAGE,              /**< actuator: output voltage */
+    SAUL_ACT_ID_CURRENT,              /**< actuator: output current */
+    SAUL_ACT_NUMOF                    /**< Number of actuators supported */
     /* Extend this list as needed, but keep SAUL_ACT_ID_ANY the first and
      * SAUL_ACT_NUMOF the last entry
      */
@@ -165,6 +164,10 @@ enum {
     SAUL_ACT_SWITCH         = SAUL_CAT_ACT | SAUL_ACT_ID_SWITCH,
     /** actuator: dimmable switch */
     SAUL_ACT_DIMMER         = SAUL_CAT_ACT | SAUL_ACT_ID_DIMMER,
+    /** actuator: output current */
+    SAUL_ACT_CURRENT        = SAUL_CAT_ACT | SAUL_ACT_ID_CURRENT,
+    /** actuator: output voltage */
+    SAUL_ACT_VOLTAGE        = SAUL_CAT_ACT | SAUL_ACT_ID_VOLTAGE,
     /** any sensor - wildcard */
     SAUL_SENSE_ANY          = SAUL_CAT_SENSE | SAUL_SENSE_ID_ANY,
     /** sensor: simple button */

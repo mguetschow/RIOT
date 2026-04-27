@@ -7,6 +7,11 @@
 # Packages should include this file just after defining the PKG_* variables
 # This will ensure the variables are defined in the Makefile.
 
+RIOTMAKE ?= $(RIOTBASE)/makefiles
+
+include $(RIOTMAKE)/utils/ansi.mk
+include $(RIOTMAKE)/color.inc.mk
+
 ifneq (,$(.DEFAULT_GOAL))
   $(error $(lastword $(MAKEFILE_LIST)) must be included at the beginning of the file after defining the PKG_* variables)
 endif
@@ -46,12 +51,12 @@ endif
 
 PKG_SOURCE_LOCAL ?= $(PKG_SOURCE_LOCAL_$(shell echo $(PKG_NAME) | tr a-z- A-Z_))
 
-# git-cache specific management: GIT_CACHE_DIR is exported only
-# when cloning the repository.
-GITCACHE ?= $(RIOTTOOLS)/git/git-cache
-GIT_CACHE_DIR ?= $(HOME)/.gitcache
-include $(RIOTBASE)/makefiles/utils/variables.mk
-$(call target-export-variables,$(PKG_BUILDDIR)/.git,GIT_CACHE_DIR)
+# Check if git-cache-rs is installed in the local default directory and if so,
+# set the `GIT_CACHE_RS` variable to use it.
+DEFAULT_GIT_CACHE_RS ?= $(HOME)/.cargo/bin/git-cache
+ifeq ($(DEFAULT_GIT_CACHE_RS),$(wildcard $(DEFAULT_GIT_CACHE_RS)))
+  GIT_CACHE_RS ?= $(DEFAULT_GIT_CACHE_RS)
+endif
 
 # allow overriding package source with local folder (useful during development)
 ifneq (,$(PKG_SOURCE_LOCAL))
@@ -63,7 +68,8 @@ ifeq ($(QUIET),1)
 endif
 
 GITFLAGS ?= -c user.email=buildsystem@riot -c user.name="RIOT buildsystem"
-GITAMFLAGS ?= $(GIT_QUIET) --no-gpg-sign --ignore-whitespace --whitespace=nowarn
+GITAMFLAGS ?= $(GIT_QUIET)
+GITAMFLAGS += --no-gpg-sign --ignore-whitespace --whitespace=nowarn
 
 .PHONY: all prepare clean distclean FORCE
 
@@ -153,24 +159,29 @@ endif
 
 ifneq (,$(GIT_CACHE_RS))
 $(PKG_SOURCE_DIR)/.git: $(PKG_SPARSE_TAG) | $(PKG_CUSTOM_PREPARED)
-	$(if $(QUIETER),,$(info [INFO] cloning $(PKG_NAME)))
+	$(if $(QUIETER),,$(info [INFO] cloning $(PKG_NAME) with git-cache-rs))
 	$(Q)rm -Rf $(PKG_SOURCE_DIR)
 	$(Q)$(GIT_CACHE_RS) clone --commit $(PKG_VERSION) $(addprefix --sparse-add ,$(PKG_SPARSE_PATHS)) -- $(PKG_URL) $(PKG_SOURCE_DIR)
-else ifeq ($(GIT_CACHE_DIR),$(wildcard $(GIT_CACHE_DIR)))
-$(PKG_SOURCE_DIR)/.git: | $(PKG_CUSTOM_PREPARED)
-	$(if $(QUIETER),,$(info [INFO] cloning $(PKG_NAME)))
-	$(Q)rm -Rf $(PKG_SOURCE_DIR)
-	$(Q)mkdir -p $(PKG_SOURCE_DIR)
-	$(Q)$(GITCACHE) clone $(PKG_URL) $(PKG_VERSION) $(PKG_SOURCE_DIR)
 else
 # redirect stderr so git sees a pipe and not a terminal see https://github.com/git/git/blob/master/progress.c#L138
-$(PKG_SOURCE_DIR)/.git: | $(PKG_CUSTOM_PREPARED)
-	$(if $(QUIETER),,$(info [INFO] cloning without cache $(PKG_NAME)))
+$(PKG_SOURCE_DIR)/.git: $(PKG_SPARSE_TAG) | $(PKG_CUSTOM_PREPARED)
+	$(if $(QUIETER),,$(info [INFO] cloning $(PKG_NAME) without cache))
+	@echo "$(COLOR_YELLOW)[INFO] Consider using git-cache-rs to speed up your build" \
+	  "and reduce network traffic! See:" \
+	  "https://guides.riot-os.org/build-system/advanced_build_system_tricks/#speed-up-builds-with-git-cache-rs" \
+	  "$(COLOR_RESET)"
 	$(Q)rm -Rf $(PKG_SOURCE_DIR)
 	$(Q)mkdir -p $(PKG_SOURCE_DIR)
 	$(Q)git init $(GIT_QUIET) $(PKG_SOURCE_DIR)
+	$(Q)if [ -n "$(PKG_SPARSE_PATHS)" ]; then \
+	  # iff the package uses sparse paths, initialize the repository as sparse \
+	  $(if $(QUIETER),,echo "[INFO] using sparse checkout";) \
+	  $(GIT_IN_PKG) sparse-checkout init --no-cone; \
+	  $(GIT_IN_PKG) sparse-checkout set -- $(foreach p,$(PKG_SPARSE_PATHS),"$(p)"); \
+	fi
 	$(Q)$(GIT_IN_PKG) remote add origin $(PKG_URL)
-	$(Q)$(GIT_IN_PKG) config extensions.partialClone origin
+	$(Q)$(GIT_IN_PKG) config remote.origin.promisor true
+	$(Q)$(GIT_IN_PKG) config remote.origin.partialclonefilter blob:none
 	$(Q)$(GIT_IN_PKG) config advice.detachedHead false
 	$(Q)$(GIT_IN_PKG) fetch $(GIT_QUIET) --depth=1 -t --filter=blob:none origin $(PKG_VERSION)
 	$(Q)$(GIT_IN_PKG) checkout $(GIT_QUIET) $(PKG_VERSION) 2>&1 | cat

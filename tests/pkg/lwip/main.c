@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2015 Martine Lenders <mlenders@inf.fu-berlin.de>
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Martine Lenders <mlenders@inf.fu-berlin.de>
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -38,9 +35,6 @@ static const shell_command_t shell_commands[] = {
 #endif
 #ifdef MODULE_SOCK_TCP
     { "tcp", "Send TCP messages and listen for messages on TCP port", tcp_cmd },
-#endif
-#ifdef MODULE_SOCK_UDP
-    { "udp", "Send UDP messages and listen for messages on UDP port", udp_cmd },
 #endif
     { NULL, NULL, NULL }
 };

@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2016 Freie Universität Berlin
- *               2017 OTA keys S.A.
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2016 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -46,7 +43,11 @@ extern "C" {
 /**
  * @brief   Wake-up pins configuration (CSR register)
  */
-#define PM_EWUP_CONFIG          (0U)
+#  ifdef CPU_FAM_STM32H7
+#    define PM_EWUP_CONFIG     (PWR_WKUPEPR_WKUPEN4) /* Enable WKUP4 pin (BTN0) */
+#  else
+#    define PM_EWUP_CONFIG     (0U)
+#  endif
 #endif
 /** @} */
 

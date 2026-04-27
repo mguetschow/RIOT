@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2017 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -36,10 +33,11 @@ extern "C" {
 #error "Can't determine the number of ADC devices"
 #endif
 
-#if defined(CPU_MODEL_STM32L476RG) || defined(CPU_MODEL_STM32L476VG) || \
-    defined(CPU_MODEL_STM32L475VG) || defined(CPU_MODEL_STM32L452RE) || \
-    defined(CPU_MODEL_STM32L432KC) || defined(CPU_MODEL_STM32L496ZG) || \
-    defined(CPU_MODEL_STM32L4R5ZI) || defined(CPU_MODEL_STM32L496AG)
+#if defined(CPU_MODEL_STM32L412KB) || defined(CPU_MODEL_STM32L476RG) || \
+    defined(CPU_MODEL_STM32L476VG) || defined(CPU_MODEL_STM32L475VG) || \
+    defined(CPU_MODEL_STM32L452RE) || defined(CPU_MODEL_STM32L432KC) || \
+    defined(CPU_MODEL_STM32L496ZG) || defined(CPU_MODEL_STM32L4R5ZI) || \
+    defined(CPU_MODEL_STM32L496AG)
 /**
  * @brief   ADC voltage regulator start-up time [us]
  */

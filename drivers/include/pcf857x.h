@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2018 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2018 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -326,20 +323,6 @@ typedef uint8_t pcf857x_data_t;     /**< type that can mask all expander pins */
 
 #endif /* MODULE_PCF8575 || DOXYGEN */
 /** @} */
-
-/**
- * @brief       Definition of PCF857X driver error codes
- *
- * @deprecated  These are aliases for errno error codes now, use them directly
- */
-typedef enum {
-    PCF857X_OK              = 0,        /**< success */
-    PCF857X_ERROR_I2C       = ENXIO,    /**< I2C communication error */
-    PCF857X_ERROR_INV_EXP   = ENOTSUP,  /**< invalid expander variant */
-    PCF857X_ERROR_INV_MODE  = EINVAL,   /**< invalid pin mode */
-    PCF857X_ERROR_INV_FLANK = EINVAL,   /**< invalid interrupt flank */
-    PCF857X_ERROR_INT_PIN   = ENOSYS,   /**< interrupt pin initialization failed */
-} pcf857x_error_codes_t;
 
 /**
  * @brief Definition of PCF857X expander variants

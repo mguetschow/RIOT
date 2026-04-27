@@ -1,10 +1,9 @@
 /*
- * Copyright (C) 2022 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- *
+ * SPDX-FileCopyrightText: 2022 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
+ */
+
+/*
  * FreeRTOS to RIOT-OS adaption module for source code compatibility
  */
 
@@ -145,6 +144,10 @@ UBaseType_t uxQueueMessagesWaiting( QueueHandle_t xQueue );
         xQueueGenericSend( ( xQueue ), ( pvItemToQueue ), ( xTicksToWait ), \
                            queueSEND_TO_BACK )
 
+#define xQueueSendToFront( xQueue, pvItemToQueue, xTicksToWait ) \
+        xQueueGenericSend( ( xQueue ), ( pvItemToQueue ), ( xTicksToWait ), \
+                           queueSEND_TO_FRONT )
+
 #define xQueueSendFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken ) \
         xQueueGenericSendFromISR( ( xQueue ), ( pvItemToQueue ), \
                                   ( pxHigherPriorityTaskWoken ), \
@@ -154,6 +157,11 @@ UBaseType_t uxQueueMessagesWaiting( QueueHandle_t xQueue );
         xQueueGenericSendFromISR( ( xQueue ), ( pvItemToQueue ), \
                                   ( pxHigherPriorityTaskWoken ), \
                                   queueSEND_TO_BACK )
+
+#define xQueueSendToFrontFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken ) \
+        xQueueGenericSendFromISR( ( xQueue ), ( pvItemToQueue ), \
+                                  ( pxHigherPriorityTaskWoken ), \
+                                  queueSEND_TO_FRONT )
 
 #define xQueueOverwriteFromISR( xQueue, pvItemToQueue, pxHigherPriorityTaskWoken ) \
         xQueueGenericSendFromISR( ( xQueue ), ( pvItemToQueue ), \

@@ -21,11 +21,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "kernel_defines.h"
 #include "checksum/fletcher32.h"
 #include "net/nanocoap/fileserver.h"
 #include "vfs.h"
-#include "vfs_util.h"
+
+#if MODULE_VFS_UTIL
+#  include "vfs_util.h"
+#endif
 
 #define ENABLE_DEBUG 0
 #include "debug.h"
@@ -484,7 +486,6 @@ static ssize_t _get_directory(coap_pkt_t *pdu, uint8_t *buf, size_t len,
                &block2);
     coap_block_slicer_init(&slicer, block2.blknum, coap_szx2size(block2.szx));
     coap_opt_add_block2(pdu, &slicer, true);
-    buf += coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
 
     size_t root_len = root ? strlen(root) : 0;
     const char *root_dir = &request->namebuf[root_len];
@@ -502,32 +503,34 @@ static ssize_t _get_directory(coap_pkt_t *pdu, uint8_t *buf, size_t len,
         bool is_dir = entry_is_dir(request->namebuf, entry_name);
 
         if (slicer.cur) {
-            buf += coap_blockwise_put_char(&slicer, buf, ',');
+            coap_blockwise_put_char_pkt(pdu, &slicer, ',');
+        } else {
+            /* no payload written yet - set payload marker */
+            coap_opt_finish(pdu, COAP_OPT_FINISH_PAYLOAD);
         }
-        buf += coap_blockwise_put_char(&slicer, buf, '<');
-        buf += coap_blockwise_put_bytes(&slicer, buf, resource_dir, resource_dir_len);
-        buf += coap_blockwise_put_bytes(&slicer, buf, root_dir, root_dir_len);
-        buf += coap_blockwise_put_char(&slicer, buf, '/');
-        buf += coap_blockwise_put_bytes(&slicer, buf, entry_name, entry_len);
+        coap_blockwise_put_char_pkt(pdu, &slicer, '<');
+        coap_blockwise_put_bytes_pkt(pdu, &slicer, resource_dir, resource_dir_len);
+        coap_blockwise_put_bytes_pkt(pdu, &slicer, root_dir, root_dir_len);
+        coap_blockwise_put_char_pkt(pdu, &slicer, '/');
+        coap_blockwise_put_bytes_pkt(pdu, &slicer, entry_name, entry_len);
         if (is_dir) {
-            buf += coap_blockwise_put_char(&slicer, buf, '/');
+            coap_blockwise_put_char_pkt(pdu, &slicer, '/');
         }
-        buf += coap_blockwise_put_char(&slicer, buf, '>');
+        coap_blockwise_put_char_pkt(pdu, &slicer, '>');
     }
 
     vfs_closedir(&dir);
     coap_block2_finish(&slicer);
 
-    return (uintptr_t)buf - (uintptr_t)pdu->hdr;
+    return (uintptr_t)pdu->payload - (uintptr_t)pdu->buf;
 }
 
 #if IS_USED(MODULE_NANOCOAP_FILESERVER_PUT)
 static ssize_t _put_directory(coap_pkt_t *pdu, uint8_t *buf, size_t len,
                               struct requestdata *request)
 {
-    int err;
     vfs_DIR dir;
-    if ((err = vfs_opendir(&dir, request->namebuf)) == 0) {
+    if (vfs_opendir(&dir, request->namebuf) == 0) {
         vfs_closedir(&dir);
         if (request->options.exists.if_match && request->options.if_match_len) {
             return _error_handler(pdu, buf, len, COAP_CODE_PRECONDITION_FAILED);
@@ -538,6 +541,7 @@ static ssize_t _put_directory(coap_pkt_t *pdu, uint8_t *buf, size_t len,
         if (request->options.exists.if_match) {
             return _error_handler(pdu, buf, len, COAP_CODE_PRECONDITION_FAILED);
         }
+        int err;
         if ((err = vfs_mkdir(request->namebuf, 0777)) < 0) {
             return _error_handler(pdu, buf, len, err);
         }

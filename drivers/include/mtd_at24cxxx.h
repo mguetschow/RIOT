@@ -1,16 +1,13 @@
 /*
- * Copyright (C) 2020 Otto-von-Guericke Universität
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Otto-von-Guericke Universität
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
 
 /**
  * @defgroup    drivers_mtd_at24cxxx MTD wrapper for AT24cxxx family of I2C-EEPROMs
- * @ingroup     drivers_storage
+ * @ingroup     drivers_mtd
  * @brief       MTD wrapper for AT24XXX I2C based EEPROMs
  *
  * @{

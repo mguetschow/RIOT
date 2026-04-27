@@ -91,22 +91,23 @@ PSEUDOMODULES += gcoap_dns
 ## Enable the @ref gcoap_dns_server_proxy_set function
 PSEUDOMODULES += gcoap_dns_proxied
 ## @}
+
 PSEUDOMODULES += fido2_tests
 ## @addtogroup net_dhcpv6_client
 ## @{
+
 ## @defgroup net_gnrc_dhcpv6_client	gnrc_dhcpv6_client: Basic DHCPv6 client implementation in GNRC
-## @{
 PSEUDOMODULES += gnrc_dhcpv6_client
-## @}
+
 ## @defgroup net_gnrc_dhcpv6_client_6lbr gnrc_dhcpv6_client_6lbr: Basic client for GNRC 6LoWPAN BRs
-## @{
 PSEUDOMODULES += gnrc_dhcpv6_client_6lbr
 ## @}
+
 ## @addtogroup net_dhcpv6_client_simple_pd
 ## @{
 PSEUDOMODULES += gnrc_dhcpv6_client_simple_pd
 ## @}
-## @}
+
 PSEUDOMODULES += gnrc_ipv6_auto_subnets_auto_init
 PSEUDOMODULES += gnrc_ipv6_auto_subnets_eui
 PSEUDOMODULES += gnrc_ipv6_auto_subnets_simple
@@ -119,6 +120,7 @@ PSEUDOMODULES += gnrc_ipv6_nib_6lbr
 PSEUDOMODULES += gnrc_ipv6_nib_6ln
 PSEUDOMODULES += gnrc_ipv6_nib_6lr
 PSEUDOMODULES += gnrc_ipv6_nib_dns
+PSEUDOMODULES += gnrc_ipv6_nib_dyn_lladdr
 PSEUDOMODULES += gnrc_ipv6_nib_rio
 PSEUDOMODULES += gnrc_ipv6_nib_router
 PSEUDOMODULES += gnrc_ipv6_nib_rtr_adv_pio_cb
@@ -130,7 +132,6 @@ PSEUDOMODULES += gnrc_netif_bus
 PSEUDOMODULES += gnrc_netif_timestamp
 PSEUDOMODULES += gnrc_netif_6lo
 PSEUDOMODULES += gnrc_netif_ipv6
-PSEUDOMODULES += gnrc_netif_mac
 PSEUDOMODULES += gnrc_netif_single
 PSEUDOMODULES += gnrc_netif_dedup
 
@@ -142,12 +143,6 @@ PSEUDOMODULES += gnrc_netif_dedup
 ## @{
 ## Enables @ref GNRC_NETTYPE_CCN and @ref GNRC_NETTYPE_CCN_CHUNK
 PSEUDOMODULES += gnrc_nettype_ccn
-## @}
-
-## @defgroup 	net_gnrc_nettype_gomac      gnrc_nettype_gomac
-## @{
-## Enables @ref GNRC_NETTYPE_GOMACH
-PSEUDOMODULES += gnrc_nettype_gomach
 ## @}
 
 ## @defgroup 	net_gnrc_nettype_icmpv6     gnrc_nettype_icmpv6
@@ -166,22 +161,6 @@ PSEUDOMODULES += gnrc_nettype_ipv6
 ## @{
 ## Enables @ref GNRC_NETTYPE_IPV6_EXT.
 PSEUDOMODULES += gnrc_nettype_ipv6_ext
-## @}
-
-## @defgroup 	net_gnrc_nettype_lorawan    gnrc_nettype_lorawan
-## Enables @ref GNRC_NETTYPE_LORAWAN
-##
-## @deprecated  LoRaWAN payloads do not have a special type anymore and just use
-##              @ref GNRC_NETTYPE_UNDEF. There is no module needed for that.
-##              This module will be removed after 2024.10 release.
-## @{
-PSEUDOMODULES += gnrc_nettype_lorawan
-## @}
-
-## @defgroup 	net_gnrc_nettype_lwmac      gnrc_nettype_lwmac
-## Enables @ref GNRC_NETTYPE_LWMAC
-## @{
-PSEUDOMODULES += gnrc_nettype_lwmac
 ## @}
 
 ## @defgroup 	net_gnrc_nettype_ndn        gnrc_nettype_ndn
@@ -209,6 +188,17 @@ PSEUDOMODULES += gnrc_nettype_udp
 ## @}
 ## @}
 
+## @addtogroup	net_gnrc_pktshark
+## @{
+## @brief	Enable parsing of IPv6 encapsulated IPv4 packets
+PSEUDOMODULES += gnrc_pktshark_4in6
+## @brief	Enable parsing of CoAP messages
+PSEUDOMODULES += gnrc_pktshark_coap
+## @brief	Enable parsing of default protocols
+PSEUDOMODULES += gnrc_pktshark_default
+## @brief	Enable parsing of ICMPv6 messages
+PSEUDOMODULES += gnrc_pktshark_icmpv6
+## @}
 
 PSEUDOMODULES += gnrc_sixloenc
 PSEUDOMODULES += gnrc_sixlowpan_border_router_default
@@ -424,23 +414,31 @@ PSEUDOMODULES += shell_cmd_gnrc_netif
 PSEUDOMODULES += shell_cmd_gnrc_netif_lora
 PSEUDOMODULES += shell_cmd_gnrc_netif_lorawan
 PSEUDOMODULES += shell_cmd_gnrc_pktbuf
+PSEUDOMODULES += shell_cmd_gnrc_pktshark
 PSEUDOMODULES += shell_cmd_gnrc_rpl
 PSEUDOMODULES += shell_cmd_gnrc_sixlowpan_ctx
 PSEUDOMODULES += shell_cmd_gnrc_sixlowpan_frag_stats
 PSEUDOMODULES += shell_cmd_gnrc_txtsnd
+## @defgroup sys_shell_commands_gnrc_udp GNRC UDP shell command
+## @ingroup sys_shell_commands
+## @{
+## @deprecated use @ref sys_shell_commands_udp instead. will be removed after release 2026.10
 PSEUDOMODULES += shell_cmd_gnrc_udp
+## @}
 PSEUDOMODULES += shell_cmd_heap
 PSEUDOMODULES += shell_cmd_i2c_scan
 PSEUDOMODULES += shell_cmd_iw
 PSEUDOMODULES += shell_cmd_lwip_netif
 PSEUDOMODULES += shell_cmd_mci
 PSEUDOMODULES += shell_cmd_md5sum
+PSEUDOMODULES += shell_cmd_mtd
 PSEUDOMODULES += shell_cmd_nanocoap_vfs
 PSEUDOMODULES += shell_cmd_netstats_neighbor
 PSEUDOMODULES += shell_cmd_nice
 PSEUDOMODULES += shell_cmd_nimble_netif
 PSEUDOMODULES += shell_cmd_nimble_statconn
 PSEUDOMODULES += shell_cmd_opendsme
+PSEUDOMODULES += shell_cmd_openthread
 PSEUDOMODULES += shell_cmd_openwsn
 PSEUDOMODULES += shell_cmd_pm
 PSEUDOMODULES += shell_cmd_ps
@@ -455,7 +453,10 @@ PSEUDOMODULES += shell_cmd_sht1x
 PSEUDOMODULES += shell_cmd_sntp
 PSEUDOMODULES += shell_cmd_suit
 PSEUDOMODULES += shell_cmd_sys
+PSEUDOMODULES += shell_cmd_udp
+PSEUDOMODULES += shell_cmd_udp_server
 PSEUDOMODULES += shell_cmd_udptty
+PSEUDOMODULES += shell_cmd_xipfs
 PSEUDOMODULES += shell_cmd_vfs
 PSEUDOMODULES += shell_cmds_default
 PSEUDOMODULES += shell_hooks
@@ -463,9 +464,11 @@ PSEUDOMODULES += shell_lock_auto_locking
 PSEUDOMODULES += shield_llcc68
 PSEUDOMODULES += shield_sx1262
 PSEUDOMODULES += shield_w5100
-PSEUDOMODULES += slipdev_stdio
+PSEUDOMODULES += stdio_slipdev
 PSEUDOMODULES += slipdev_config
 PSEUDOMODULES += slipdev_l2addr
+PSEUDOMODULES += slipdev_net
+PSEUDOMODULES += slipdev
 PSEUDOMODULES += sock
 PSEUDOMODULES += sock_async
 PSEUDOMODULES += sock_aux_local
@@ -559,6 +562,10 @@ PSEUDOMODULES += vfs_auto_mount
 ## backends.
 PSEUDOMODULES += vfs_default
 
+PSEUDOMODULES += walltime_default
+PSEUDOMODULES += walltime_impl_ds1307
+PSEUDOMODULES += walltime_impl_ds3231
+PSEUDOMODULES += walltime_impl_rtc
 PSEUDOMODULES += wakaama_objects_%
 PSEUDOMODULES += wifi_scan_list
 PSEUDOMODULES += wifi_enterprise

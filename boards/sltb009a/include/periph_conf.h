@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2015-2020 Freie Universität Berlin
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015-2020 Freie Universität Berlin
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -113,9 +110,10 @@ static const i2c_conf_t i2c_config[] = {
         .scl_pin = GPIO_PIN(PE, 5),
         .loc = I2C_ROUTELOC0_SDALOC_LOC7 |
                I2C_ROUTELOC0_SCLLOC_LOC7,
+        .speed = I2C_SPEED_NORMAL,
         .cmu = cmuClock_I2C0,
         .irq = I2C0_IRQn,
-        .speed = I2C_SPEED_NORMAL
+        .use_internal_pull_ups = true
     }
 };
 
@@ -162,6 +160,18 @@ static const spi_dev_t spi_config[] = {
 static const timer_conf_t timer_config[] = {
     {
         .prescaler = {
+            .dev = WTIMER0,
+            .cmu = cmuClock_WTIMER0
+        },
+        .timer = {
+            .dev = WTIMER1,
+            .cmu = cmuClock_WTIMER1
+        },
+        .irq = WTIMER1_IRQn,
+        .channel_numof = 3
+    },
+    {
+        .prescaler = {
             .dev = TIMER0,
             .cmu = cmuClock_TIMER0
         },
@@ -187,8 +197,9 @@ static const timer_conf_t timer_config[] = {
 };
 
 #define TIMER_NUMOF         ARRAY_SIZE(timer_config)
-#define TIMER_0_ISR         isr_timer1
-#define TIMER_1_ISR         isr_letimer0
+#define TIMER_0_ISR         isr_wtimer1
+#define TIMER_1_ISR         isr_timer1
+#define TIMER_2_ISR         isr_letimer0
 /** @} */
 
 /**

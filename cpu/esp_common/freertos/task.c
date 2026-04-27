@@ -1,11 +1,6 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- *
- * FreeRTOS to RIOT-OS adaption module for source code compatibility
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #ifndef DOXYGEN
@@ -148,12 +143,15 @@ void vTaskSuspend(TaskHandle_t xTaskToSuspend)
     }
 }
 
+static bool _suspend_all = false;
+
 void vTaskSuspendAll(void)
 {
     /* TODO:
      * It has to be implemented once there is a mechanism in RIOT to suspend
      * the scheduler without disabling interrupts. At the moment it is a
      * placeholder to make the linker happy. */
+    _suspend_all = true;
 }
 
 void vTaskResume(TaskHandle_t xTaskToResume)
@@ -169,12 +167,50 @@ void vTaskResume(TaskHandle_t xTaskToResume)
 BaseType_t xTaskResumeAll(void)
 {
     /* TODO */
+    _suspend_all = false;
     return pdFALSE;
 }
+
+BaseType_t xTaskGetSchedulerState(void)
+{
+    if (thread_get_active() == KERNEL_PID_UNDEF) {
+        return taskSCHEDULER_NOT_STARTED;
+    }
+    else if (_suspend_all) {
+        return taskSCHEDULER_SUSPENDED;
+    }
+
+    return taskSCHEDULER_RUNNING;
+};
 
 void vTaskDelay(const TickType_t xTicksToDelay)
 {
     DEBUG("%s xTicksToDelay=%"PRIu32"\n", __func__, xTicksToDelay);
+
+#ifdef CPU_ESP8266
+    /*
+     * FIXME if possible
+     * With the ESP8266, this function is only called by
+     * `ieee80211_sta_new_state`, with interrupts of all levels disabled,
+     * for example as a result of executing `esp_wifi_disconnect`.
+     * If `ztimer_sleep` is then called with interrupts disabled, for
+     * some reason this leads to memory corruption when interrupts are
+     * re-enabled afterwards. The only way to avoid this is to re-enable
+     * interrupts before calling `ztimer_sleep`.
+     *
+     * Since debugging ESP8266 code is very limited and sometimes impossible
+     * due to there being only one hardware breakpoint and a lot of closed
+     * binary code involved when calling `esp_wifi_disconnect`, it was not
+     * possible to find the reason for the memory corruption. An exception
+     * occurs after executing `esp_wifi_disconnect` in `ztimer_handler` when
+     * `_callback_unlock_mutex` is called with a mutex parameter that points
+     * to irrelevant read-only memory in IROM.
+     *
+     * Therefore, enabling the interrupts here is currently the only way to
+     * avoid the exception, even though this is only a hack.
+     */
+    irq_enable();
+#endif
 
 #if defined(MODULE_ZTIMER_MSEC)
     uint64_t ms = xTicksToDelay * portTICK_PERIOD_MS;

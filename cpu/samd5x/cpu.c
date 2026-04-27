@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 ML!PA Consulting GmbH
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 ML!PA Consulting GmbH
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -17,6 +14,7 @@
  * @}
  */
 
+#include "busy_wait.h"
 #include <assert.h>
 
 #include "cpu.h"
@@ -59,7 +57,8 @@
 #  endif
 
 #  if (CLOCK_CORECLOCK > SAM0_XOSC_FREQ_HZ)
-#    error When using an external oscillator for the main clock, the CPU frequency can't exceed it's frequency.
+#    error When using an external oscillator for the main clock,\
+the CPU frequency can't exceed it's frequency.
 #  endif
 
 #  define USE_DPLL 0
@@ -75,7 +74,10 @@
 /* Main clock > 48 MHz -> use DPLL, otherwise use DFLL */
 #  define USE_DPLL (CLOCK_CORECLOCK > SAM0_DFLL_FREQ_HZ)
 #  define USE_DFLL 1
+/* if USE_XOSC is set 1 it is used as source for (FD)PLL and DFLL unless USE_XOSC_ONLY is set */
+#ifndef USE_XOSC
 #  define USE_XOSC 0
+#endif
 
 #  ifndef GCLK_TIMER_HZ
 #    define GCLK_TIMER_HZ MHZ(8)
@@ -102,19 +104,34 @@ static void xosc32k_init(void)
         return;
     }
 
+    /* Startup should be a valid value 0 - 6 (~63 ms to ~8000 ms) see manual 7 is reserved
+     * table 29-2 : time_for_startup_val[] = {63ms, 125ms, 500ms, 1sec, 2sec, 4sec, 8sec}
+     * this delay will happen only when the system is powered on or the XOSC32
+     * is re-enabled after being disabled for e.g.: standby*/
     OSC32KCTRL->XOSC32K.reg = OSC32KCTRL_XOSC32K_ENABLE
                             | OSC32KCTRL_XOSC32K_EN1K
                             | OSC32KCTRL_XOSC32K_EN32K
                             | OSC32KCTRL_XOSC32K_RUNSTDBY
                             | OSC32KCTRL_XOSC32K_XTALEN
-                            | OSC32KCTRL_XOSC32K_STARTUP(7);
+                            | OSC32KCTRL_XOSC32K_STARTUP(3); /* 3 ^= ~1sec see above or manual*/
 
     while (!(OSC32KCTRL->STATUS.reg & OSC32KCTRL_STATUS_XOSC32KRDY)) {}
 }
 
+/* XOSC0 is run by an external oscillator 0 (default (crystal)) or 1 (external oscillator) */
+#ifndef XOSC0_EXT_OSC
+#  define XOSC0_EXT_OSC (0)
+#endif
+
+/* XOSC1 is run by an external oscillator 0 (default (crystal)) or 1 (external oscillator) */
+#ifndef XOSC1_EXT_OSC
+#  define XOSC1_EXT_OSC (0)
+#endif
+
 static void xosc_init(uint8_t idx)
 {
     uint32_t freq;
+    bool xtal;
 
     if (!USE_XOSC ||
             (idx == 0 && XOSC0_FREQUENCY == 0) ||
@@ -127,9 +144,17 @@ static void xosc_init(uint8_t idx)
 
     if (idx == 0) {
         freq = XOSC0_FREQUENCY;
+        xtal = !XOSC0_EXT_OSC;
     }
     else if (idx == 1) {
         freq = XOSC1_FREQUENCY;
+        xtal = !XOSC1_EXT_OSC;
+    }
+
+    if (xtal) {
+        OSCCTRL->XOSCCTRL[idx].reg = OSCCTRL_XOSCCTRL_ENABLE;
+        while (!(OSCCTRL->STATUS.vec.XOSCRDY & (idx + 1))) {}
+        return;
     }
 
     uint32_t reg = OSCCTRL_XOSCCTRL_XTALEN
@@ -197,25 +222,61 @@ static void fdpll_init_nolock(uint8_t idx, uint32_t f_cpu, uint8_t flags)
         return;
     }
 
-    /* Source the DPLL from 32kHz GCLK1 ( equivalent to ((f_cpu << 5) / 32768) ) */
-    const uint32_t LDR = (f_cpu >> 10);
-
     /* disable the DPLL before changing the configuration */
-    OSCCTRL->Dpll[idx].DPLLCTRLA.reg &= ~OSCCTRL_DPLLCTRLA_ENABLE;
+    OSCCTRL->Dpll[idx].DPLLCTRLA.reg = 0;
     while (OSCCTRL->Dpll[idx].DPLLSYNCBUSY.reg) {}
 
-    /* set DPLL clock source */
-    GCLK->PCHCTRL[OSCCTRL_GCLK_ID_FDPLL0 + idx].reg = GCLK_PCHCTRL_GEN(1) | GCLK_PCHCTRL_CHEN;
-    while (!(GCLK->PCHCTRL[OSCCTRL_GCLK_ID_FDPLL0 + idx].reg & GCLK_PCHCTRL_CHEN)) {}
+     /* holds LDR 13 bit integer and 5 bit fractional part:
+      * - integer part: ldr13_5 >> 5
+      * - fractional part: ldr13_5 & 0x1f */
+    uint32_t ldr13_5;
+    uint32_t ctrlb = 0;
 
-    OSCCTRL->Dpll[idx].DPLLRATIO.reg = OSCCTRL_DPLLRATIO_LDRFRAC(LDR & 0x1F)
-                                     | OSCCTRL_DPLLRATIO_LDR((LDR >> 5) - 1);
+    /* HW revision before F  (A and D) might false unlock -> LBYPASS and WUF */
+    unsigned rev = (DSU->DID.reg & DSU_DID_REVISION_Msk) >> DSU_DID_REVISION_Pos;
+    if ('A' + rev < 'F') {
+        ctrlb |= OSCCTRL_DPLLCTRLB_WUF | OSCCTRL_DPLLCTRLB_LBYPASS;
+    }
 
-    /* Without LBYPASS, startup takes very long, see errata section 2.13. */
-    OSCCTRL->Dpll[idx].DPLLCTRLB.reg = OSCCTRL_DPLLCTRLB_REFCLK_GCLK
-                                     | OSCCTRL_DPLLCTRLB_WUF
-                                     | OSCCTRL_DPLLCTRLB_LBYPASS;
+    /* Without LBYPASS, startup takes very long, see errata section 2.13.
+     * according to the documentation several milliseconds
+     * (critical for some application not so much for other)*/
+    if (EXTERNAL_OSC32_SOURCE) {
+        /* Source the DPLL from 32kHz XOSC32 ( equivalent to ((f_cpu << 5) / 32768) ) */
+        ldr13_5  = (f_cpu >> 10);
+        ctrlb |= OSCCTRL_DPLLCTRLB_REFCLK_XOSC32;
+    }
+    else if (XOSC0_FREQUENCY) {
+        /* Source the DPLL from XOSC0 divide to 1 MHz then multiply to fcpu */
+        /* fDIV = fXOSC / 2 * ( DIV + 1) */
+        const uint32_t div = (XOSC0_FREQUENCY / MHZ(1) / 2) -1;
+        ldr13_5 = (f_cpu / MHZ(1)) << 5;
+        ctrlb |= OSCCTRL_DPLLCTRLB_DIV(div) | OSCCTRL_DPLLCTRLB_REFCLK_XOSC0;
+    }
+    else if (XOSC1_FREQUENCY) {
+        /* Source the DPLL from XOSC1 divide to 1 MHz then multiply to fcpu */
+        /* fDIV = fXOSC / 2 * ( DIV + 1) */
+        const uint32_t div = (XOSC1_FREQUENCY / MHZ(1) / 2) -1;
+        ldr13_5 = (f_cpu / MHZ(1)) << 5;
+        ctrlb |= OSCCTRL_DPLLCTRLB_DIV(div) | OSCCTRL_DPLLCTRLB_REFCLK_XOSC1;
+    }
+    else {
+        /* TODO find a better fallback source (eg 48MCLK routed though gclk divided down to 1MHz)
+         * until then the frequency might not be defined if source is low power internal 32kHz*/
+        /* set DPLL clock source */
+        GCLK->PCHCTRL[OSCCTRL_GCLK_ID_FDPLL0 + idx].reg = GCLK_PCHCTRL_GEN(1) | GCLK_PCHCTRL_CHEN;
+        while (!(GCLK->PCHCTRL[OSCCTRL_GCLK_ID_FDPLL0 + idx].reg & GCLK_PCHCTRL_CHEN)) {}
+        /* Source the DPLL from 32kHz GCLK1 ( equivalent to ((f_cpu << 5) / 32768) )
+         * avoid the routing through gclk when XOSC32 is the source */
+        ldr13_5 = (f_cpu >> 10);
+        ctrlb |= OSCCTRL_DPLLCTRLB_REFCLK_GCLK;
+    }
 
+    /* fCLK_DPLL = (fCKR) × (LDR + 1 + LDRFRAC/32) with fCKR = fclock reference / divider (ctrlb) */
+    OSCCTRL->Dpll[idx].DPLLRATIO.reg = OSCCTRL_DPLLRATIO_LDRFRAC(ldr13_5 & 0x1F)
+                                     | OSCCTRL_DPLLRATIO_LDR((ldr13_5 >> 5) - 1);
+
+    OSCCTRL->Dpll[idx].DPLLCTRLB.reg = ctrlb;
     OSCCTRL->Dpll[idx].DPLLCTRLA.reg = OSCCTRL_DPLLCTRLA_ENABLE | flags;
 
     while (OSCCTRL->Dpll[idx].DPLLSYNCBUSY.reg) {}
@@ -225,6 +286,14 @@ static void fdpll_lock(uint8_t idx)
 {
     const uint32_t flags = (OSCCTRL_DPLLSTATUS_CLKRDY | OSCCTRL_DPLLSTATUS_LOCK);
     while (!((OSCCTRL->Dpll[idx].DPLLSTATUS.reg & flags) == flags)) {}
+
+    /* TODO make this configurable currently prefer correctness over time */
+    /* HW revision before F  (A and D) might false unlock -> LBYPASS and WUF
+     * doing that we need to ensure the PLL had enough time to lock(at least 10 ms) */
+    unsigned rev = (DSU->DID.reg & DSU_DID_REVISION_Msk) >> DSU_DID_REVISION_Pos;
+    if ('A' + rev < 'F') {
+        busy_wait_us(10 * US_PER_MS);
+    }
 }
 
 static void gclk_connect(uint8_t id, uint8_t src, uint32_t flags)

@@ -37,6 +37,14 @@ void auto_init_screen(void)
             extern void auto_init_st77xx(void);
             auto_init_st77xx();
         }
+        if (IS_USED(MODULE_U8G2_DISP_DEV)) {
+            extern void auto_init_u8g2_display(void);
+            auto_init_u8g2_display();
+        }
+        if (IS_USED(MODULE_GC9A01)) {
+            extern void auto_init_gc9a01(void);
+            auto_init_gc9a01();
+        }
     }
 
     if (IS_USED(MODULE_TOUCH_DEV)) {

@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2015 Lari Lehtomäki
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Lari Lehtomäki
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -124,7 +121,7 @@ static const pwm_conf_t pwm_config[] = {
     {
         .dev      = TIM2,
         .rcc_mask = RCC_APB1ENR_TIM2EN,
-        .chan     = { { .pin = GPIO_PIN(PORT_A, 15)         , .cc_chan = 0 },
+        .chan     = { { .pin = GPIO_PIN(PORT_A, 15),          .cc_chan = 0 },
                       { .pin = GPIO_PIN(PORT_B, 3)  /* D3 */, .cc_chan = 1 },
                       { .pin = GPIO_PIN(PORT_B, 10) /* D6 */, .cc_chan = 2 },
                       { .pin = GPIO_UNDEF,                    .cc_chan = 0 } },

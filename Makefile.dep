@@ -3,7 +3,7 @@
 -include $(APPDIR)/Makefile.$(TOOLCHAIN).dep
 
 # select default stdio provider if no other is selected
-ifeq (,$(filter stdio_% slipdev_stdio,$(USEMODULE)))
+ifeq (,$(filter stdio_%,$(USEMODULE)))
   USEMODULE += stdio_default
 endif
 
@@ -81,6 +81,12 @@ endif
 ifneq (,$(filter lwext%_vfs,$(USEMODULE)))
   USEPKG += lwext4
   USEMODULE += vfs
+endif
+
+ifneq (,$(filter xipfs,$(USEMODULE)))
+  USEPKG += xipfs
+  USEMODULE += vfs
+  USEMODULE += xipfs_fs
 endif
 
 ifneq (,$(filter nimble_%,$(USEMODULE)))

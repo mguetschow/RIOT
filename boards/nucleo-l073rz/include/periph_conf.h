@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2017 Freie Universität Berlin
- *               2017 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2017 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2017 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -99,7 +96,7 @@ static const pwm_conf_t pwm_config[] = {
         .rcc_mask = RCC_APB1ENR_TIM3EN,
         .chan     = { { .pin = GPIO_PIN(PORT_B, 4) /* D5 */, .cc_chan = 0 },
                       { .pin = GPIO_PIN(PORT_C, 7) /* D9 */, .cc_chan = 1 },
-                      { .pin = GPIO_PIN(PORT_C, 8)         , .cc_chan = 2 },
+                      { .pin = GPIO_PIN(PORT_C, 8),          .cc_chan = 2 },
                       { .pin = GPIO_UNDEF,                   .cc_chan = 0 } },
         .af       = GPIO_AF2,
         .bus      = APB1

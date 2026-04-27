@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -157,4 +154,9 @@ void __wrap_pm_attach(void)
     extern void __real_pm_attach(void);
     __real_pm_attach();
 #endif
+}
+
+bool cpu_woke_from_backup(void)
+{
+    return esp_reset_reason() == ESP_RST_DEEPSLEEP;
 }

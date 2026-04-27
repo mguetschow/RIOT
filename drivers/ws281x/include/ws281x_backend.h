@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Marian Buschsieweke
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Marian Buschsieweke
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -27,7 +24,7 @@ extern "C" {
  * @{
  */
 #ifdef MODULE_WS281X_ATMEGA
-#define WS281X_HAVE_INIT                    (1)
+#  define WS281X_HAVE_INIT                  (1)
 #endif
 /** @} */
 
@@ -36,7 +33,7 @@ extern "C" {
  * @{
  */
 #ifdef MODULE_WS281X_ESP32
-#define WS281X_HAVE_INIT                    (1)
+#  define WS281X_HAVE_INIT                  (1)
 #endif
 /** @} */
 
@@ -45,8 +42,8 @@ extern "C" {
  * @{
  */
 #ifdef MODULE_WS281X_VT100
-#define WS281X_HAVE_PREPARE_TRANSMISSION    (1)
-#define WS281X_HAVE_END_TRANSMISSION        (1)
+#  define WS281X_HAVE_PREPARE_TRANSMISSION  (1)
+#  define WS281X_HAVE_END_TRANSMISSION      (1)
 #endif
 /** @} */
 
@@ -55,7 +52,18 @@ extern "C" {
  * @{
  */
 #ifdef MODULE_WS281X_TIMER_GPIO_LL
-#define WS281X_HAVE_INIT                    (1)
+#  define WS281X_HAVE_INIT                  (1)
+#endif
+/** @} */
+
+/**
+ * @name    Properties of the SPI backend.
+ * @{
+ */
+#ifdef MODULE_WS281X_SPI
+#  define WS281X_HAVE_INIT                  (1)
+#  define WS281X_HAVE_PREPARE_TRANSMISSION  (1)
+#  define WS281X_HAVE_END_TRANSMISSION      (1)
 #endif
 /** @} */
 

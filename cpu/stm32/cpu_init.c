@@ -1,14 +1,10 @@
 /*
- * Copyright (C) 2013 INRIA
- *               2014 Freie Universität Berlin
- *               2016 TriaGnoSys GmbH
- *               2018 Kaspar Schleiser <kaspar@schleiser.de>
- *               2018 OTA keys S.A.
- *
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2013 INRIA
+ * SPDX-FileCopyrightText: 2014 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2016 TriaGnoSys GmbH
+ * SPDX-FileCopyrightText: 2018 Kaspar Schleiser <kaspar@schleiser.de>
+ * SPDX-FileCopyrightText: 2018 OTA keys S.A.
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -28,7 +24,6 @@
  * @author      Vincent Dupont <vincent@otakeys.com>
  * @author      Oleg Artamonov <oleg@unwds.com>
  * @author      Francisco Molina <francisco.molina@inria.cl>
- *
  * @}
  */
 
@@ -48,6 +43,8 @@
 #define BIT_APB_PWREN       RCC_APB1ENR1_PWREN
 #elif defined(CPU_FAM_STM32G0) || defined(CPU_FAM_STM32C0)
 #define BIT_APB_PWREN       RCC_APBENR1_PWREN
+#elif defined (CPU_FAM_STM32H7)
+#define BIT_APB_PWREN       RCC_APB1HENR_CRSEN
 #elif !defined(CPU_FAM_STM32MP1)
 #define BIT_APB_PWREN       RCC_APB1ENR_PWREN
 #endif

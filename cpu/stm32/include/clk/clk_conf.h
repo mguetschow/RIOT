@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2020 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -26,6 +23,8 @@
 #include "f2f4f7/cfg_clock_default.h"
 #elif defined(CPU_FAM_STM32G0) || defined(CPU_FAM_STM32G4)
 #include "g0g4/cfg_clock_default.h"
+#elif defined(CPU_FAM_STM32H7)
+#include "h7/cfg_clock_default.h"
 #elif defined(CPU_FAM_STM32C0)
 #include "c0/cfg_clock_default.h"
 #elif defined(CPU_FAM_STM32L0) || defined(CPU_FAM_STM32L1)

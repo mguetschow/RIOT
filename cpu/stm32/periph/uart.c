@@ -1,11 +1,8 @@
 /*
- * Copyright (C) 2014-2017 Freie Universität Berlin
- * Copyright (C) 2016 OTA keys
- * Copyright (C) 2018 Inria
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2014-2017 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2016 OTA keys
+ * SPDX-FileCopyrightText: 2018 Inria
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -53,6 +50,13 @@
 #define ISR_TC      USART_ISR_TC
 #define TDR_REG     TDR
 #define RDR_REG     RDR
+#elif defined(CPU_FAM_STM32H7)
+#  define ISR_REG     ISR
+#  define ISR_TXE     USART_ISR_TXE_TXFNF
+#  define ISR_RXNE    USART_ISR_RXNE_RXFNE
+#  define ISR_TC      USART_ISR_TC
+#  define TDR_REG     TDR
+#  define RDR_REG     RDR
 #else
 #define ISR_REG     SR
 #define ISR_TXE     USART_SR_TXE
@@ -420,7 +424,6 @@ void uart_write(uart_t uart, const uint8_t *data, size_t len)
             dev(uart)->CR3 |= USART_CR3_DMAT;
             dma_transfer(uart_config[uart].dma, uart_config[uart].dma_chan, data,
                          (void *)&dev(uart)->TDR_REG, len, DMA_MEM_TO_PERIPH, DMA_INC_SRC_ADDR);
-
             /* make sure the function is synchronous by waiting for the transfer to
              * finish */
             wait_for_tx_complete(uart);

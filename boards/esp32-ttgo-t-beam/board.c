@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -28,7 +25,7 @@
 
 #define AXP192_I2C_ADDR         (0x34)
 #define AXP192_LDO234_DC23_CTL  (0x12)
-#define AXP192_LDO3OUT_VOL      (0x29)
+#define AXP192_LDO3OUT_VOL      (0x28)
 #define AXP192_LDO3_ON_BIT      (1 << 3)
 
 void board_init(void)

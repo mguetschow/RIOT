@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2020 Koen Zandberg
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2020 Koen Zandberg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #pragma once
@@ -90,6 +87,7 @@ extern const char *cst816s_gesture_str[];
  * @brief cst816s touch event data
  */
 typedef struct {
+    bool valid;                 /**< Sample contains valid touch point */
     cst816s_gesture_t gesture;  /**< Detected gesture */
     cst816s_touch_t action;     /**< Press or release event */
     uint16_t x;                 /**< X coordinate */

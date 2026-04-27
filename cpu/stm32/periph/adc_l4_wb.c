@@ -1,10 +1,7 @@
 /*
- * Copyright (C) 2014-2016 Freie Universität Berlin
- * Copyright (C) 2018 HAW-Hamburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2014-2016 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2018 HAW-Hamburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -34,6 +31,9 @@
  */
 #if defined ADC_DEVS && ADC_DEVS == 1
 #define ADC ADC1_COMMON
+#endif
+#if defined ADC_DEVS && ADC_DEVS == 2
+#define ADC ADC12_COMMON
 #endif
 #if defined ADC_DEVS && ADC_DEVS == 3
 #define ADC ADC123_COMMON

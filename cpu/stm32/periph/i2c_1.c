@@ -1,12 +1,9 @@
 /*
- * Copyright (C) 2015 Jan Pohlmann <jan-pohlmann@gmx.de>
- *               2017 we-sens.com
- *               2018 Inria
- *               2018 HAW Hamburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2015 Jan Pohlmann <jan-pohlmann@gmx.de>
+ * SPDX-FileCopyrightText: 2017 we-sens.com
+ * SPDX-FileCopyrightText: 2018 Inria
+ * SPDX-FileCopyrightText: 2018 HAW Hamburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -66,6 +63,8 @@
 #define I2C_CLOCK_SRC_REG       (RCC->CCIPR1)
 #elif defined(RCC_DCKCFGR2_I2C1SEL)
 #define I2C_CLOCK_SRC_REG       (RCC->DCKCFGR2)
+#elif defined(RCC_D2CCIP2R_I2C123SEL)
+#  define I2C_CLOCK_SRC_REG     (RCC->D2CCIP2R)
 #endif
 
 static uint32_t hsi_state;
@@ -100,7 +99,8 @@ void i2c_init(i2c_t dev)
 
 #if defined(CPU_FAM_STM32F0) || defined(CPU_FAM_STM32F3) || \
     defined(CPU_FAM_STM32F7) || defined(CPU_FAM_STM32L4) || \
-    defined(CPU_FAM_STM32L5) || defined(CPU_FAM_STM32WB)
+    defined(CPU_FAM_STM32L5) || defined(CPU_FAM_STM32WB) || \
+    defined(CPU_FAM_STM32H7)
     /* select I2C clock source */
     I2C_CLOCK_SRC_REG |= i2c_config[dev].rcc_sw_mask;
 #endif

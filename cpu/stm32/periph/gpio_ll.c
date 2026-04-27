@@ -1,13 +1,10 @@
 /*
- * Copyright (C) 2014-2015 Freie Universität Berlin
- *               2015 Hamburg University of Applied Sciences
- *               2017-2020 Inria
- *               2017 OTA keys S.A.
- *               2021 Otto-von-Guericke-Universität Magdeburg
- *
- * This file is subject to the terms and conditions of the GNU Lesser General
- * Public License v2.1. See the file LICENSE in the top level directory for more
- * details.
+ * SPDX-FileCopyrightText: 2014-2015 Freie Universität Berlin
+ * SPDX-FileCopyrightText: 2015 Hamburg University of Applied Sciences
+ * SPDX-FileCopyrightText: 2017-2020 Inria
+ * SPDX-FileCopyrightText: 2017 OTA keys S.A.
+ * SPDX-FileCopyrightText: 2021 Otto-von-Guericke-Universität Magdeburg
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -76,6 +73,11 @@ static inline void print_str(const char *str)
 #ifdef RCC_APB2ENR_IOPAEN
 #  define GPIO_BUS      APB2
 #  define GPIOAEN       RCC_APB2ENR_IOPAEN
+#endif
+
+#ifdef RCC_AHB4ENR_GPIOAEN
+#  define GPIO_BUS      AHB4
+#  define GPIOAEN       RCC_AHB4ENR_GPIOAEN
 #endif
 
 /* Bitmask to extract a mode field of the mode register "MODER".
@@ -331,7 +333,7 @@ int gpio_ll_init(gpio_port_t port, uint8_t pin, gpio_conf_t conf)
         return -ENOTSUP;
     }
 
-#ifndef GPIO_PUPDR_PUPDR0
+#if !defined(GPIO_PUPDR_PUPDR0) && !defined(GPIO_PUPDR_PUPD0)
     /* without dedicated pull up / pull down register, pull resistors can only
      * be used with input pins */
     if ((conf.state == GPIO_OUTPUT_OPEN_DRAIN) && (conf.pull != GPIO_FLOATING)) {

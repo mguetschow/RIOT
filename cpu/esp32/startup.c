@@ -1,9 +1,6 @@
 /*
- * Copyright (C) 2018 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
+ * SPDX-FileCopyrightText: 2018 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 /**
@@ -57,7 +54,7 @@
 #include "rom/rtc.h"
 #include "rom/uart.h"
 #include "soc/rtc.h"
-#ifndef CPU_FAM_ESP32H2
+#if !CPU_FAM_ESP32H2 && !CPU_FAM_ESP32C6
 #  include "soc/rtc_cntl_reg.h"
 #  include "soc/rtc_cntl_struct.h"
 #  include "soc/syscon_reg.h"

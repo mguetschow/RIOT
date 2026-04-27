@@ -44,6 +44,7 @@ FEATURES_EXISTING := \
     ble_phy_coded \
     board_bat_voltage \
     bootloader_stm32 \
+    bug_newlib_broken_stdio \
     can_rx_mailbox \
     cortexm_fpu \
     cortexm_mpu \
@@ -85,6 +86,8 @@ FEATURES_EXISTING := \
     cpu_nrf53 \
     cpu_nrf9160 \
     cpu_qn908x \
+    cpu_rp2350_arm \
+    cpu_rp2350_riscv \
     cpu_rpx0xx \
     cpu_sam3 \
     cpu_sam4s \
@@ -102,6 +105,7 @@ FEATURES_EXISTING := \
     cpu_stm32f7 \
     cpu_stm32g0 \
     cpu_stm32g4 \
+    cpu_stm32h7 \
     cpu_stm32l0 \
     cpu_stm32l1 \
     cpu_stm32l4 \
@@ -114,9 +118,8 @@ FEATURES_EXISTING := \
     efm32_coretemp \
     emulator_renode \
     esp_ble \
-    esp_ble_esp32 \
-    esp_ble_esp32c3 \
     esp_hw_counter \
+    esp_ieee802154 \
     esp_jtag \
     esp_now \
     esp_rmt \
@@ -256,6 +259,7 @@ FEATURES_EXISTING := \
     periph_wdt \
     periph_wdt_cb \
     periph_wdt_warning_period \
+    periph_xh3irq \
     picolibc \
     pio_i2c \
     puf_sram \

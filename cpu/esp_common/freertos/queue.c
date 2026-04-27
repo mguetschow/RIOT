@@ -1,11 +1,6 @@
 /*
- * Copyright (C) 2019 Gunar Schorcht
- *
- * This file is subject to the terms and conditions of the GNU Lesser
- * General Public License v2.1. See the file LICENSE in the top level
- * directory for more details.
- *
- * FreeRTOS to RIOT-OS adaption module for source code compatibility
+ * SPDX-FileCopyrightText: 2019 Gunar Schorcht
+ * SPDX-License-Identifier: LGPL-2.1-only
  */
 
 #ifndef DOXYGEN
@@ -564,8 +559,10 @@ BaseType_t IRAM_ATTR xQueueReceiveFromISR (QueueHandle_t xQueue,
                                0, pxHigherPriorityTaskWoken);
 }
 
-UBaseType_t uxQueueMessagesWaiting( QueueHandle_t xQueue )
+UBaseType_t uxQueueMessagesWaiting(QueueHandle_t xQueue)
 {
+    DEBUG("%s queue=%p isr=%d\n", __func__, xQueue, irq_is_in());
+
     assert(xQueue != NULL);
 
     _queue_t* queue = (_queue_t*)xQueue;
@@ -581,6 +578,23 @@ BaseType_t xQueueGiveFromISR (QueueHandle_t xQueue,
 
     return _queue_generic_send(xQueue, NULL, queueSEND_TO_BACK,
                                0, pxHigherPriorityTaskWoken);
+}
+
+UBaseType_t uxQueueMessagesWaitingFromISR(const QueueHandle_t xQueue)
+{
+    return uxQueueMessagesWaiting(xQueue);
+}
+
+BaseType_t xQueueIsQueueEmpty(const QueueHandle_t xQueue)
+{
+    DEBUG("%s queue=%p isr=%d\n", __func__, xQueue, irq_is_in());
+    return uxQueueMessagesWaitingFromISR(xQueue) == 0;
+}
+
+BaseType_t xQueueIsQueueEmptyFromISR(const QueueHandle_t xQueue)
+{
+    DEBUG("%s queue=%p\n", __func__, xQueue);
+    return xQueueIsQueueEmpty(xQueue);
 }
 
 #endif /* DOXYGEN */

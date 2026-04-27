@@ -27,10 +27,22 @@
 #include "net/eui_provider.h"
 #include "net/netdev.h"
 #include "net/netdev/eth.h"
+#include "time_units.h"
 #include "usb/usbus/cdc/ecm.h"
 
 #define ENABLE_DEBUG 0
 #include "debug.h"
+
+/**
+ * @brief Timeout [us] for sending a packet down the bus.
+ *
+ * Packet sending blocks until the host issues an IN token. If the host is
+ * misbehaving and doesn't do that, we will time out instead of stalling the
+ * netif thread and any others that sync with it.
+ */
+#ifndef CONFIG_USBUS_CDC_ECM_TX_TIMEOUT_US
+#  define CONFIG_USBUS_CDC_ECM_TX_TIMEOUT_US    (50 * US_PER_MS)
+#endif
 
 static const netdev_driver_t netdev_driver_cdcecm;
 
@@ -75,7 +87,16 @@ static int _send(netdev_t *netdev, const iolist_t *iolist)
     size_t usb_remain = cdcecm->ep_in->maxpacketsize;
     DEBUG("CDC_ECM_netdev: cur iol: %d\n", iolist->iol_len);
     while (len) {
-        mutex_lock(&cdcecm->out_lock);
+        if (ztimer_mutex_lock_timeout(ZTIMER_USEC, &cdcecm->out_lock,
+                                      CONFIG_USBUS_CDC_ECM_TX_TIMEOUT_US) != 0) {
+            DEBUG("out_lock timeout!\n");
+            return -EBUSY;
+        }
+        if (cdcecm->active_iface != 1) {
+            /* Link went down while waiting. */
+            mutex_unlock(&cdcecm->out_lock);
+            return -ENOTCONN;
+        }
         if (iolist->iol_len - iol_offset > usb_remain) {
             /* Only part of the iolist can be copied, usb_remain bytes */
             memcpy(buf + usb_offset, (uint8_t *)iolist->iol_base + iol_offset,
@@ -120,7 +141,16 @@ static int _send(netdev_t *netdev, const iolist_t *iolist)
     }
     /* Zero length USB packet required */
     if ((iolist_size(iolist_start) % cdcecm->ep_in->maxpacketsize) == 0) {
-        mutex_lock(&cdcecm->out_lock);
+        if (ztimer_mutex_lock_timeout(ZTIMER_USEC, &cdcecm->out_lock,
+                                      CONFIG_USBUS_CDC_ECM_TX_TIMEOUT_US) != 0) {
+            DEBUG("out_lock timeout!\n");
+            return -EBUSY;
+        }
+        if (cdcecm->active_iface != 1) {
+            /* Link went down while waiting. */
+            mutex_unlock(&cdcecm->out_lock);
+            return -ENOTCONN;
+        }
         DEBUG("CDC ECM netdev: Zero length USB packet required\n");
         cdcecm->tx_len = 0;
         _signal_tx_xmit(cdcecm);
@@ -156,9 +186,6 @@ static int _init(netdev_t *netdev)
 
     netdev_eui48_get(netdev, (eui48_t*)&cdcecm->mac_netdev);
 
-    /* signal link UP */
-    netdev->event_callback(netdev, NETDEV_EVENT_LINK_UP);
-
     return 0;
 }
 
@@ -173,6 +200,11 @@ static int _get(netdev_t *netdev, netopt_t opt, void *value, size_t max_len)
             assert(max_len >= ETHERNET_ADDR_LEN);
             memcpy(value, cdcecm->mac_netdev, ETHERNET_ADDR_LEN);
             return ETHERNET_ADDR_LEN;
+        case NETOPT_LINK:
+            assert(max_len >= sizeof(netopt_enable_t));
+            *(netopt_enable_t *)value = cdcecm->active_iface ? NETOPT_ENABLE
+                                                             : NETOPT_DISABLE;
+            return sizeof(netopt_enable_t);
         default:
             return netdev_eth_get(netdev, opt, value, max_len);
     }

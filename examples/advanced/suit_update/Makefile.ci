@@ -9,6 +9,7 @@ BOARD_INSUFFICIENT_MEMORY := \
     gd32vf103c-start \
     lsn50 \
     nucleo-c031c6 \
+    nucleo-c071rb \
     nucleo-f302r8 \
     nucleo-f303k8 \
     nucleo-f334r8 \
@@ -24,6 +25,7 @@ BOARD_INSUFFICIENT_MEMORY := \
     seeedstudio-gd32 \
     sipeed-longan-nano \
     sipeed-longan-nano-tft \
+    slstk3301a \
     slstk3400a \
     stk3200 \
     stm32f0discovery \
