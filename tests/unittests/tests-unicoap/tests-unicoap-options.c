@@ -392,15 +392,15 @@ static void test_shortest_uint_in_option_value(void)
     TEST_ASSERT_EQUAL_INT(sizeof(options_blob), unicoap_options_size(&options));
     _TEST_ASSERT_EQUAL_BYTES(options_blob, unicoap_options_data(&options), sizeof(options_blob));
 
-    uint8_t uint8 = 42;
-    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint8(&options, OPT_NUM, &uint8));
-    TEST_ASSERT_EQUAL_INT(0, uint8);
-    uint16_t uint16 = 42;
-    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint16(&options, OPT_NUM, &uint16));
-    TEST_ASSERT_EQUAL_INT(0, uint16);
-    uint32_t uint32 = 42;
-    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint32(&options, OPT_NUM, &uint32));
-    TEST_ASSERT_EQUAL_INT(0, uint32);
+    uint8_t uint8_val = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint8(&options, OPT_NUM, &uint8_val));
+    TEST_ASSERT_EQUAL_INT(0, uint8_val);
+    uint16_t uint16_val = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint16(&options, OPT_NUM, &uint16_val));
+    TEST_ASSERT_EQUAL_INT(0, uint16_val);
+    uint32_t uint32_val = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint32(&options, OPT_NUM, &uint32_val));
+    TEST_ASSERT_EQUAL_INT(0, uint32_val);
 }
 
 Test* tests_unicoap_options(void)
