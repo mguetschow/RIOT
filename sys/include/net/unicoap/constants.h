@@ -491,6 +491,13 @@ typedef enum {
     UNICOAP_OPTION_CONTENT_FORMAT = 12,
 
     /**
+     * @brief `Uri-Path-Abbrev` option
+     *
+     * @see [draft-ietf-core-uri-path-abbrev](https://www.ietf.org/archive/id/draft-ietf-core-uri-path-abbrev-04.html)
+     */
+    UNICOAP_OPTION_URI_PATH_ABBREV = 13,
+
+    /**
      * @brief `Max-Age` option
      *
      * @see [RFC 7252](https://datatracker.ietf.org/doc/html/rfc7252#section-5.10.5)
@@ -694,6 +701,18 @@ static_assert(sizeof(unicoap_option_number_t) == sizeof(uint16_t),
               "unicoap_option_number_t has unexpected size");
 /** @} */
 /** @} */
+
+/**
+ * @brief CoAP Uri-Path-Abbrev numbers
+ *
+ * @see [raft-ietf-core-uri-path-abbrev-04, Section 6.2](https://www.ietf.org/archive/id/draft-ietf-core-uri-path-abbrev-04.html#name-uri-path-abbrev-registry)
+ */
+typedef enum {
+    /**
+     * @brief corresponds to /.well-known/core
+     */
+    UNICOAP_OPTION_URI_PATH_ABBREV_WELL_KNOWN_CORE = 0,
+} __attribute__((__packed__)) unicoap_option_uri_path_abbrev_t;
 
 /**
  * @addtogroup net_unicoap_options_predefined

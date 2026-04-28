@@ -1089,6 +1089,57 @@ static inline int unicoap_options_remove_uri_port(unicoap_options_t* options)
 }
 /** @} */ /* Uri-Port */
 
+/* MARK: - Uri-Path-Abbrev */
+/**
+ * @name Uri-Path-Abbrev
+ * @{
+ */
+
+/**
+ * @brief Retrieves the `Uri-Path-Abbrev` option, if present
+ * @memberof unicoap_options_t
+ *
+ * @param[in] options Options to read from
+ * @param[out] path_abbrev Pointer to value variable
+ *
+ * @returns Size of option value in bytes on success, negative error number otherwise
+ * @retval `-ENOENT` Option not found
+ * @retval `-EBADOPT` Option corrupted
+ */
+static inline ssize_t unicoap_options_get_uri_path_abbrev(const unicoap_options_t* options, uint32_t* path_abbrev)
+{
+    return unicoap_options_get_uint32(options, UNICOAP_OPTION_URI_PATH_ABBREV, path_abbrev);
+}
+
+/**
+ * @brief Sets the `Uri-Path-Abbrev` option
+ * @memberof unicoap_options_t
+ *
+ * @param[in,out] options Options to write to
+ * @param path_abbrev `Uri-Path-Abbrev` value
+ *
+ * @returns Zero on success, negative error number otherwise
+ * @retval `-ENOBUFS` Options buffer lacks sufficient capacity to set option
+ */
+static inline ssize_t unicoap_options_set_uri_path_abbrev(unicoap_options_t* options, uint32_t path_abbrev)
+{
+    return unicoap_options_set_uint(options, UNICOAP_OPTION_URI_PATH_ABBREV, path_abbrev);
+}
+
+/**
+ * @brief Removes the `Uri-Path-Abbrev` option, if present
+ * @memberof unicoap_options_t
+ *
+ * @param[in,out] options Options to write to
+ *
+ * @returns Zero on success, negative error number otherwise
+ */
+static inline int unicoap_options_remove_uri_path_abbrev(unicoap_options_t* options)
+{
+    return unicoap_options_remove(options, UNICOAP_OPTION_URI_PATH_ABBREV);
+}
+/** @} */ /* Uri-Path-Abbrev */
+
 /* MARK: - Content-Format */
 /**
  * @name Content-Format

@@ -35,6 +35,18 @@ int unicoap_resource_match_request_default(const unicoap_listener_t* listener,
     assert(request);
     assert(endpoint);
 
+    /* illegal according to Section 6.2 of draft-ietf-core-uri-path-abbrev-04 */
+    uint32_t path_abbrev = UINT32_MAX;
+    if (unicoap_options_get_uri_path_abbrev(request->options, &path_abbrev) >= 0) {
+        /* we only support /.well-known/core for now */
+        if (path_abbrev != UNICOAP_OPTION_URI_PATH_ABBREV_WELL_KNOWN_CORE) {
+            /* signal non-understood uri-path-abbrev to sender */
+            // todo: how to send diagnostic message back up? (not needed, but possible with CBOR diagnostics, see Section 2.1)
+            // todo: this _could_ instead be moved to option parsing if/when critical option rejection is implemented there
+            return UNICOAP_STATUS_BAD_OPTION;
+        }
+    }
+
     int res = UNICOAP_STATUS_PATH_NOT_FOUND;
     for (unsigned int i = 0; i < listener->resource_count; i += 1) {
         *resource = &listener->resources[i];
@@ -44,6 +56,16 @@ int unicoap_resource_match_request_default(const unicoap_listener_t* listener,
                 unicoap_path_print(&(*resource)->path);
             }
             DEBUG(">, proto %s not in allowed set\n", unicoap_string_from_proto(endpoint->proto));
+            continue;
+        }
+
+        /* we only support /.well-known/core for now */
+        if (path_abbrev == UNICOAP_OPTION_URI_PATH_ABBREV_WELL_KNOWN_CORE) {
+            unicoap_pathspec_t path_abbrev = UNICOAP_PATH_RESOURCE_DISCOVERY;
+            if (unicoap_path_is_equal(&(*resource)->path, &path_abbrev)) {
+                return 0;
+            }
+            /* (abbreviated) URI mismatch */
             continue;
         }
 

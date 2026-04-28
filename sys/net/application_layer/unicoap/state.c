@@ -360,6 +360,7 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
         if ((res = unicoap_resource_find(packet, &resource, &listener)) != 0) {
             unicoap_response_init_empty(message, res < 0 ? UNICOAP_STATUS_INTERNAL_SERVER_ERROR :
                                                            (unicoap_status_t)res);
+            // todo: how to bubble diagnostic payload back up here?
             unicoap_messaging_send(packet, UNICOAP_MESSAGING_FLAGS_DEFAULT);
             return UNICOAP_PREPROCESSING_ERROR_REQUEST;
         }
