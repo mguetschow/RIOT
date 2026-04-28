@@ -546,6 +546,11 @@ ssize_t unicoap_options_copy_value(const unicoap_options_t* options, unicoap_opt
     if (size < 0) {
         return size;
     }
+    if (size == 0) {
+        /* value 0 SHOULD have been encoded as zero-length value, see RFC7252, Section 3.2 */
+        *dest = 0;
+        return size;
+    }
     if ((size_t)size > capacity) {
         return -ENOBUFS;
     }
@@ -921,6 +926,11 @@ ssize_t _unicoap_options_get_variable_uint(const unicoap_options_t* options,
     const uint8_t* src = NULL;
     ssize_t size = unicoap_options_get(options, number, &src);
     if (size < 0) {
+        return size;
+    }
+    if (size == 0) {
+        /* value 0 SHOULD have been encoded as zero-length value, see RFC7252, Section 3.2 */
+        *uint = 0;
         return size;
     }
     if ((size_t)size > max_size) {

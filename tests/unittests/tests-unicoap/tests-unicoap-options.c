@@ -383,6 +383,26 @@ static void test_remove_multiple(void)
     _TEST_ASSERT_EQUAL_BYTES(options_blob, unicoap_options_data(&options), sizeof(options_blob));
 }
 
+static void test_shortest_uint_in_option_value(void)
+{
+    static const uint8_t options_blob[] = { 0x00 };
+    const unicoap_option_number_t OPT_NUM = 0; // RESERVED
+    UNICOAP_OPTIONS_ALLOC_STATIC(options, 10);
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_add_uint(&options, OPT_NUM, 0));
+    TEST_ASSERT_EQUAL_INT(sizeof(options_blob), unicoap_options_size(&options));
+    _TEST_ASSERT_EQUAL_BYTES(options_blob, unicoap_options_data(&options), sizeof(options_blob));
+
+    uint8_t uint8 = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint8(&options, OPT_NUM, &uint8));
+    TEST_ASSERT_EQUAL_INT(0, uint8);
+    uint16_t uint16 = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint16(&options, OPT_NUM, &uint16));
+    TEST_ASSERT_EQUAL_INT(0, uint16);
+    uint32_t uint32 = 42;
+    TEST_ASSERT_EQUAL_INT(0, unicoap_options_get_uint32(&options, OPT_NUM, &uint32));
+    TEST_ASSERT_EQUAL_INT(0, uint32);
+}
+
 Test* tests_unicoap_options(void)
 {
     EMB_UNIT_TESTFIXTURES(fixtures){
@@ -393,6 +413,7 @@ Test* tests_unicoap_options(void)
         new_TestFixture(test_remove_leading),
         new_TestFixture(test_remove_trailing),
         new_TestFixture(test_remove_multiple),
+        new_TestFixture(test_shortest_uint_in_option_value),
     };
 
     EMB_UNIT_TESTCALLER(test_unicoap, NULL, NULL, fixtures);
