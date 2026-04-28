@@ -240,7 +240,7 @@ void unicoap_listener_register(unicoap_listener_t* listener)
     for (unsigned int i = 0; i < listener->resource_count; i += 1) {
         if (IS_ACTIVE(CONFIG_UNICOAP_ASSIST)) {
             if (!listener->resources[i].methods) {
-                char path[CONFIG_UNIOCOAP_PATH_LENGTH_MAX];
+                char path[CONFIG_UNICOAP_PATH_LENGTH_MAX];
                 ssize_t length =
                     unicoap_path_stringify(&listener->resources[i].path, path, sizeof(path));
                 if (length < 0) {

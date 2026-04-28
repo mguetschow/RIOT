@@ -83,6 +83,8 @@ typedef struct {
      */
     uint16_t size;
 
+    // todo: highest bit in size could maybe be (ab)used to mark whether this option has been accessed (to report non-handled critical options later)
+
     /**
      * @brief Option number
      */
