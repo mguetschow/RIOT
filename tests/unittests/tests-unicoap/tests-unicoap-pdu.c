@@ -86,7 +86,9 @@ static void test_pdu_rfc7252_actuators_round_trip(void)
                                       _BYTES(),
                                       UNICOAP_TYPE_CON, 65201);
 
+#if !IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
     TEST_ASSERT_EQUAL_INT(parsed.options.option_count, 5);
+#endif
 
     unicoap_content_format_t format = 0;
     unicoap_options_get_content_format(&parsed.options, &format);

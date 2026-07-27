@@ -607,6 +607,10 @@ PSEUDOMODULES += test_utils_main_exit_cb
 PSEUDOMODULES += tiny_strerror_as_strerror
 PSEUDOMODULES += tiny_strerror_minimal
 
+# reduce metadata (RAM) overhead for option parsing and serialization,
+# while increasing runtime cost for out-of-order option access
+PSEUDOMODULES += unicoap_options_minimal_metadata
+
 # An umbrella module for the unicoap_driver_rfc7252_common_pdu
 # and unicoap_driver_rfc7252_common_messaging modules
 PSEUDOMODULES += unicoap_driver_rfc7252_common

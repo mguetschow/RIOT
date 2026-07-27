@@ -15,6 +15,7 @@
 
 #include "net/unicoap/constants.h"
 #include "net/unicoap/options.h"
+#include "net/unicoap/options/base.h"
 
 /**
  * @addtogroup net_unicoap_message
@@ -347,7 +348,7 @@ const char* unicoap_string_from_rfc7252_type(unicoap_rfc7252_message_type_t type
  */
 static inline uint8_t* unicoap_message_options_data(const unicoap_message_t* message)
 {
-    return message->options ? message->options->entries->data : NULL;
+    return message->options ? unicoap_options_data(message->options) : NULL;
 }
 
 /**

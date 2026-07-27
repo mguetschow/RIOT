@@ -49,7 +49,9 @@ static void assert_options_data(const unicoap_options_t* options)
         0x11, 0x32, 0x37, 0x63, 0x6f, 0x6c, 0x6f, 0x72, 0x3d, 0x67, 0x21, 0x32
     };
 
+#if !IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
     TEST_ASSERT_EQUAL_INT(options->option_count, 5);
+#endif
     TEST_ASSERT_EQUAL_INT(unicoap_options_size(options), sizeof(option_data));
     _TEST_ASSERT_EQUAL_BYTES(unicoap_options_data(options), option_data, sizeof(option_data));
 }

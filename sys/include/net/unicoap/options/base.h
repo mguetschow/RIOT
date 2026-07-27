@@ -109,6 +109,10 @@ typedef struct {
      */
     size_t storage_capacity;
 
+#if IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
+    uint8_t* data;
+    unicoap_option_number_t last_option_number;
+#else
     /**
      * @brief Helper array used to encode and decode options into options storage.
      * @internal
@@ -123,6 +127,7 @@ typedef struct {
      * This is also the number of entries in the @ref unicoap_options_t::entries array.
      */
     size_t option_count;
+#endif /* MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA */
 } unicoap_options_t;
 
 /**
@@ -136,8 +141,13 @@ typedef struct {
 static inline void unicoap_options_init(unicoap_options_t* options, uint8_t* storage,
                                         size_t capacity)
 {
+#if !IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
     options->entries->data = storage;
     options->option_count = 0;
+#else
+    options->data = storage;
+    options->last_option_number = 0;
+#endif /* !MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA */
     options->storage_size = 0;
     options->storage_capacity = capacity;
 }
@@ -163,7 +173,11 @@ bool unicoap_options_contains(const unicoap_options_t* options, unicoap_option_n
  */
 static inline void unicoap_options_clear(unicoap_options_t* options)
 {
+#if !IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
     options->option_count = 0;
+#else
+    options->last_option_number = 0;
+#endif
     options->storage_size = 0;
 }
 /** @} */
@@ -174,12 +188,21 @@ static inline void unicoap_options_clear(unicoap_options_t* options)
  * @{
  */
 #ifndef DOXYGEN
-#  define _UNICOAP_OPTIONS_ALLOC(_buf, _name, capacity, _static)    \
-    _static uint8_t _buf[capacity];                                 \
-    _static unicoap_options_t _name = {                             \
-        .entries = { { .data = _buf } },                            \
-        .storage_capacity = capacity,                               \
-    };
+#  if IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
+#    define _UNICOAP_OPTIONS_ALLOC(_buf, _name, capacity, _static)      \
+        _static uint8_t _buf[capacity];                                 \
+        _static unicoap_options_t _name = {                             \
+            .data = _buf,                                               \
+            .storage_capacity = capacity,                               \
+        };
+#  else
+#    define _UNICOAP_OPTIONS_ALLOC(_buf, _name, capacity, _static)      \
+        _static uint8_t _buf[capacity];                                 \
+        _static unicoap_options_t _name = {                             \
+            .entries = { { .data = _buf } },                            \
+            .storage_capacity = capacity,                               \
+        };
+#  endif /* MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA */
 #endif
 
 /**
@@ -341,7 +364,11 @@ ssize_t unicoap_options_swap_storage(unicoap_options_t* options, uint8_t* destin
  */
 static inline uint8_t* unicoap_options_data(const unicoap_options_t* options)
 {
+#if IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
+    return options->data;
+#else
     return options->entries->data;
+#endif
 }
 
 /**
@@ -582,10 +609,15 @@ typedef struct {
      */
     unicoap_options_t* options;
 
+#if IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
+    uint8_t* next_option_start;
+    unicoap_option_number_t last_option_number;
+#else
     /**
      * @brief Current option's index
      */
     size_t index;
+#endif
 } unicoap_options_iterator_t;
 
 /**
@@ -600,9 +632,15 @@ static inline void unicoap_options_iterator_init(unicoap_options_iterator_t* ite
 {
     assert(iterator);
     assert(options);
-    assert(options->entries->data);
     iterator->options = options;
+#if IS_USED(MODULE_UNICOAP_OPTIONS_MINIMAL_METADATA)
+    assert(options->data);
+    iterator->next_option_start = options->data;
+    iterator->last_option_number = 0;
+#else
+    assert(options->entries->data);
     iterator->index = 0;
+#endif
 }
 
 /**
