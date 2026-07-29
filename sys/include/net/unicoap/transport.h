@@ -14,11 +14,12 @@
 #include "uri_parser.h"
 #include "modules.h"
 
+#include "net/sock.h"
+#include "net/sock/udp.h"
+
 #if IS_USED(MODULE_UNICOAP_SOCK_SUPPORT) || defined(DOXYGEN)
-#  include "net/sock.h"
 #  include "net/sock/async/event.h"
 #  include "net/sock/util.h"
-#  include "net/sock/udp.h"
 #  include "net/sock/tcp.h"
 #endif
 
@@ -272,8 +273,8 @@ static inline struct _sock_tl_ep* _unicoap_endpoint_get_tl(unicoap_endpoint_t* e
 static inline ipv6_addr_t* unicoap_endpoint_get_ipv6_addr(unicoap_endpoint_t* endpoint) {
     (void)endpoint;
     #if IS_USED(MODULE_UNICOAP_SOCK_SUPPORT)
-    if (unicoap_transport_uses_sock_tl_ep(endpoint->proto) && 
-        (_unicoap_endpoint_get_tl(endpoint)->family == AF_INET6 || 
+    if (unicoap_transport_uses_sock_tl_ep(endpoint->proto) &&
+        (_unicoap_endpoint_get_tl(endpoint)->family == AF_INET6 ||
          _unicoap_endpoint_get_tl(endpoint)->family == AF_UNSPEC)) {
         return (ipv6_addr_t*)_unicoap_endpoint_get_tl(endpoint)->addr.ipv6;
     } else {
@@ -294,8 +295,8 @@ static inline ipv6_addr_t* unicoap_endpoint_get_ipv6_addr(unicoap_endpoint_t* en
 static inline ipv4_addr_t* unicoap_endpoint_get_ipv4_addr(unicoap_endpoint_t* endpoint) {
     (void)endpoint;
     #if IS_USED(MODULE_UNICOAP_SOCK_SUPPORT)
-    if (unicoap_transport_uses_sock_tl_ep(endpoint->proto) && 
-        (_unicoap_endpoint_get_tl(endpoint)->family == AF_INET || 
+    if (unicoap_transport_uses_sock_tl_ep(endpoint->proto) &&
+        (_unicoap_endpoint_get_tl(endpoint)->family == AF_INET ||
          _unicoap_endpoint_get_tl(endpoint)->family == AF_UNSPEC)) {
         return (ipv4_addr_t*)_unicoap_endpoint_get_tl(endpoint)->addr.ipv4;
     } else {
