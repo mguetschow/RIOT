@@ -350,7 +350,6 @@ python3 server.py --interface tap0
 You should see output like this:
 
 ```
-python3 server.py --interface tap0
 server bound to tap interface fe80::dead:beef%tap0
 using port=5683
 ```

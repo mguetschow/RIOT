@@ -476,7 +476,7 @@ static_assert(CONFIG_UNICOAP_RETRANSMISSIONS_MAX < 32,
  * @brief Extra stack memory to be used when CoAP over DTLS driver is used
  */
 #  if IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
-#    define UNICOAP_DTLS_EXTRA_STACKSIZE (THREAD_STACKSIZE_DEFAULT)
+#    define UNICOAP_DTLS_EXTRA_STACKSIZE (THREAD_STACKSIZE_LARGE)
 #  else
 #    define UNICOAP_DTLS_EXTRA_STACKSIZE (0)
 #  endif

@@ -20,6 +20,7 @@
 #include "ztimer.h"
 
 #define ENABLE_DEBUG CONFIG_UNICOAP_DEBUG_LOGGING
+#define DEBUG_PREFIX " "
 #include "debug.h"
 #include "private.h"
 

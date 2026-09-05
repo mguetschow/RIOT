@@ -21,6 +21,7 @@
 #include "thread.h"
 
 #define ENABLE_DEBUG CONFIG_UNICOAP_DEBUG_LOGGING
+#define DEBUG_PREFIX " "
 #include "debug.h"
 #include "private.h"
 
@@ -126,6 +127,7 @@ static void _deinit_client(unicoap_client_memo_t* memo)
     memo->callback._any = NULL;
     memo->callback_arg = NULL;
     memo->flags = 0;
+    // todo: token is not reset here!
 #if IS_USED(MODULE_UNICOAP_CLIENT_CANCELLATION)
     memo->reference_id = 0;
 #endif
@@ -166,8 +168,10 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error)
     (void)proto;
     memo->super.endpoint.proto = UNICOAP_PROTO_UNSPECIFIED;
     _unlock();
+    // todo: this is a race condition in case client is alloced somewhere else, then deinit'ed here!
     _deinit_client(memo);
     (void)error;
+    // todo: instead, why not first notify messaging, free super and then deinit client by memset?
 #if UNICOAP_HAVE_MESSAGING_STATE
     /* On the exchange layer, we're hiding the actual reason from the driver. It should
      * not matter to the messaging layer whether we release state because of an error or because
