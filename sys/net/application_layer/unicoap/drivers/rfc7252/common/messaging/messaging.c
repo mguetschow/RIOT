@@ -277,6 +277,8 @@ static _transmission_t* _transmission_create(const unicoap_endpoint_t* endpoint,
         _packet_set_dtls_session(packet, _transmission_get_session(transmission));
     }
 
+    MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT "transmission created\n", transmission->id);
+
     return transmission;
 }
 
@@ -316,7 +318,7 @@ static inline void _transmission_free(_transmission_t* transmission, bool failur
 }
 
 static inline void _transmission_free_notif(
-    _transmission_t* transmission, 
+    _transmission_t* transmission,
     unicoap_layer_notification_t type,
     bool failure
 ) {
@@ -339,7 +341,7 @@ void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t 
          * but then get response (CON or NON), the exchange layer will handle the response and
          * thereby cancel any retransmissions of the request because we release state here once
          * the exchange layer does. */
-        _transmission_free_notif(transmission, UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE, 
+        _transmission_free_notif(transmission, UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE,
             type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE);
     } else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC) {
         MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT "exchange layer alloc'd state (type %i)\n",
@@ -418,7 +420,9 @@ static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
          * that happens */
         extern int unicoap_transport_connect_dtls(const sock_udp_ep_t* remote, sock_dtls_session_t* session);
 
-        if (!*transmission && !(*transmission = _transmission_create(packet->remote, packet))) {
+        bool transmission_provided = (*transmission != NULL);
+
+        if (!transmission_provided && !(*transmission = _transmission_create(packet->remote, packet))) {
             return -ENOBUFS;
         }
         if ((res = unicoap_transport_connect_dtls(
@@ -428,6 +432,10 @@ static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
             if (res == -EEXIST) {
                 /* Session exists, do not delay transmission, allow caller to transmit immediately. */
                 (*transmission)->delayed = false;
+                if (!transmission_provided) {
+                    /* If the sole purpose of the transmission was delaying, free it right away. */
+                    _transmission_free(*transmission, false);
+                }
                 return 0;
             }
             return res;
@@ -463,6 +471,14 @@ static ssize_t _build_and_send_pdu(
     iolist_t lists[UNICOAP_PDU_IOLIST_COUNT];
     ssize_t size = 0;
 
+    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
+        && transmission
+        && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
+        if ((res = _connect(packet, transmission)) < 0) {
+            return res;
+        }
+    }
+
     /* By default, we build a vector of CoAP PDU chunks. This saves another copy, as the network
      * backend is going to copy anyway. However, if we need a carbon copy to later retransmit
      * the very same message, it makes no sense to write the PDU into a vector, and to then copy all
@@ -471,14 +487,6 @@ static ssize_t _build_and_send_pdu(
      * In the contiguous case, that vector has only one element. This is fine as we allocate
      * the iolists anyway. If we wanted to avoid this, we would need to dynamically allocate memory.
      */
-
-    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
-        && transmission
-        && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
-        if ((res = _connect(packet, transmission)) < 0) {
-            return res;
-        }
-    }
 
     uint8_t* carbon_copy = transmission && *transmission ? (*transmission)->pdu : NULL;
     if (carbon_copy) {
@@ -1005,7 +1013,7 @@ error:
     MESSAGING_7252_DEBUG("sending failed (%i, %s)\n", res, strerror(-res));
     if (transmission) {
         assert(transmission->exchange == NULL);
-        _transmission_free_notif(transmission, 
+        _transmission_free_notif(transmission,
             unicoap_layer_notification_async_failure_from_errno(-res),
             true
         );
