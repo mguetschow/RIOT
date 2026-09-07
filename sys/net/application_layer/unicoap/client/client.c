@@ -14,9 +14,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "ztimer.h"
 #include "mutex.h"
-#include "compiler_hints.h"
 
 #if IS_USED(MODULE_DNS)
 #  include "net/dns.h"
@@ -451,11 +449,46 @@ int unicoap_send_request_sync(unicoap_message_t* request,
     return args.res;
 }
 
+typedef struct {
+    unicoap_message_t* request;
+    unicoap_destination_t* destination;
+    unicoap_response_callback_t callback;
+    unicoap_request_parameters_t *parameters;
+    unicoap_request_flags_t flags;
+    int res;
+    mutex_t roadblock;
+} _async_args_t;
+
+static void _async_callback(unicoap_immediate_event_t *event)
+{
+    _async_args_t* a = (_async_args_t*)event->arg;
+    a->res = _open_request(a->request, a->destination,
+        (unicoap_callback_t) { .response = a->callback }, a->parameters, a->flags);
+    mutex_unlock(&a->roadblock);
+}
+
 int unicoap_send_request_async(unicoap_message_t* request,
                                unicoap_destination_t* destination,
                                unicoap_response_callback_t callback,
                                unicoap_request_parameters_t* parameters,
                                unicoap_request_flags_t flags) {
-    return _open_request(request, destination,
-        (unicoap_callback_t) { .response = callback }, parameters, flags);
+    /* Perform direct request sending only from unicoap thread */
+    if (thread_getpid() == _unicoap_pid) {
+        return _open_request(request, destination,
+            (unicoap_callback_t) { .response = callback }, parameters, flags);
+    }
+
+    unicoap_immediate_event_t req_event;
+    _async_args_t args = {
+        .request = request,
+        .destination = destination,
+        .callback = callback,
+        .parameters = parameters,
+        .flags = flags,
+        .roadblock = MUTEX_INIT_LOCKED,
+    };
+    unicoap_event_post(&req_event, _async_callback, &args, "client.req");
+    /* Block until callback calls unlock. */
+    mutex_lock(&args.roadblock);
+    return args.res;
 }

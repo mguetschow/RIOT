@@ -315,6 +315,24 @@ void unicoap_messaging_notify(void* state, unicoap_layer_notification_t type, vo
 
 /* MARK: - Event Scheduling on Internal Queue */
 
+void unicoap_event_post(unicoap_immediate_event_t *event, unicoap_immediate_event_callback_t callback,
+                        void *argument, const char *name)
+{
+    (void)name;
+#if DEVELHELP
+    assert(name);
+    event->name = name;
+#endif
+    if (IS_ACTIVE(DEVELHELP)) {
+        _STATE_EVENT_DEBUG("%s now\n", unicoap_immediate_event_name(event));
+    }
+    /* This cast is fine because (a) the return types are identical and the function argument is
+     * a pointer to a struct, too. */
+    event->super = (event_t){ .handler = (event_handler_t)callback };
+    event->arg = argument;
+    event_post(&_queue, &event->super);
+}
+
 static void _scheduled_event_callback(void* scheduled_event) {
     if (IS_ACTIVE(DEVELHELP)) {
         _STATE_EVENT_DEBUG("%s fired, exec queued\n", unicoap_scheduled_event_name(
@@ -337,7 +355,7 @@ void unicoap_event_schedule(unicoap_scheduled_event_t* event, unicoap_event_call
     event->ztimer.arg = (void*)event;
     /* This cast is fine because (a) the return types are identical and the function argument is
      * a pointer to a struct, too. */
-    event->super.handler = (event_handler_t)callback;
+    event->super = (event_t){ .handler = (event_handler_t)callback };
     ztimer_set(UNICOAP_CLOCK, &event->ztimer, duration);
 }
 
@@ -350,6 +368,9 @@ void unicoap_event_reschedule(unicoap_scheduled_event_t* event, uint32_t duratio
 }
 
 void unicoap_event_cancel(unicoap_scheduled_event_t* event) {
+    if (!event->super.handler) {
+        return;
+    }
     if (IS_ACTIVE(DEVELHELP) && unicoap_scheduled_event_name(event)) {
         _STATE_EVENT_DEBUG("%s cancelled\n", unicoap_scheduled_event_name(event));
     }
@@ -359,6 +380,7 @@ void unicoap_event_cancel(unicoap_scheduled_event_t* event) {
      * event_cancel if the event has already been posted */
         event_cancel(&_queue, &event->super);
     }
+    event->super.handler = NULL;
 #if DEVELHELP
     event->name = NULL;
 #endif
