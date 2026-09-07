@@ -204,7 +204,7 @@ unicoap_client_memo_t* unicoap_client_memo_find_refno(int refno) {
      * For 16 or fewer memos, we thus don't have to search at all. */
     size_t index_min = (refno & UNICOAP_REFNO_MASK_MIN_INDEX) >> 12;
     uint16_t reference_id = refno & UNICOAP_REFNO_MASK_ID;
-    _STATE_DEBUG("refno=%i (min_client_ix=#%" PRIuSIZE ", refid=%u)\n", refno, index_min, reference_id);
+    _STATE_DEBUG("find refno=%i (min_client_ix=#%" PRIuSIZE ", refid=%u)\n", refno, index_min, reference_id);
 #  if UNICOAP_HAVE_CLIENT_STATE
     for (size_t i = index_min; i < (size_t)ARRAY_SIZE(_state.client_memos); i += 1) {
         unicoap_client_memo_t* memo = &_state.client_memos[i];
@@ -230,7 +230,7 @@ int unicoap_client_memo_assign_refno(unicoap_client_memo_t* memo) {
      * arrays. */
     memo->reference_id = random_uint32_range(1, 0xfff); /* 12 bits for reference ID */
     int refno = memo->reference_id | (MIN(_client_index(memo), 0x7) << 12); /* 3 bits min index */
-    _STATE_DEBUG("refno=%i (min_client_ix=#%" PRIuSIZE ", refid=%u)\n",
+    _STATE_DEBUG("assign refno=%i (min_client_ix=#%" PRIuSIZE ", refid=%u)\n",
         refno, MIN(_client_index(memo), 0x7), memo->reference_id);
     return refno;
 #else

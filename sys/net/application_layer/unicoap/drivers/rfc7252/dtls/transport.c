@@ -48,15 +48,14 @@ int unicoap_transport_connect_dtls(const sock_udp_ep_t* remote, sock_dtls_sessio
     assert(remote);
     assert(session);
     int res = 0;
-    _DTLS_AUTH_DEBUG("connecting...\n");
     sock_dtls_session_set_udp_ep(session, remote);
     dsm_state_t session_state = dsm_store(&_dtls_socket, session, SESSION_STATE_HANDSHAKE, true);
     switch (session_state) {
         case SESSION_STATE_ESTABLISHED:
-            _DTLS_AUTH_DEBUG("session established\n");
+            _DTLS_AUTH_DEBUG("session already established\n");
             return -EEXIST;
         case SESSION_STATE_NONE:
-            _DTLS_AUTH_DEBUG("session not established\n");
+            _DTLS_AUTH_DEBUG("session not yet established\n");
             if ((res = sock_dtls_session_init(&_dtls_socket, remote, session)) < 0) {
                 _DTLS_AUTH_DEBUG("init DTLS session failed: %i (%s)\n", (int)res, strerror(-(int)res));
                 return res;
@@ -112,7 +111,6 @@ static void _dtls_pander_and_spoonfeed_session_mgmt(void) {
     } else {
          /* If enough session slots left: cancel timeout to free session. */
         if (dsm_get_num_available_slots() >= CONFIG_UNICOAP_DTLS_MINIMUM_AVAILABLE_SESSION_SLOTS) {
-            _DTLS_DEBUG("session triage: enough slots, cancelling triage\n");
             unicoap_event_cancel(&_dtls_session_triage_event);
         }
     }
@@ -127,7 +125,7 @@ static void _dtls_on_event(sock_dtls_t* sock, sock_async_flags_t type, void* arg
      * this logic needs to be adjusted to strictly follow the sock_dtls API.
      * For now, we need work around tinydtls quirks. */
 
-    if ((type & SOCK_ASYNC_MSG_SENT) || (type & SOCK_ASYNC_MSG_RECV) || 
+    if ((type & SOCK_ASYNC_MSG_SENT) || (type & SOCK_ASYNC_MSG_RECV) ||
         (type & SOCK_ASYNC_CONN_RECV) || (type & SOCK_ASYNC_CONN_RDY)) {
         _dtls_pander_and_spoonfeed_session_mgmt();
     }
