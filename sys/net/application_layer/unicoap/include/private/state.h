@@ -114,75 +114,6 @@ static inline unicoap_scheduled_event_t* unicoap_scheduled_event_of_event(event_
     return container_of(event, unicoap_scheduled_event_t, super);
 }
 
-/**
- * @brief An event to be executed as soon as possible
- * @ingroup net_unicoap_private_state
- * @private
- *
- * @note The API for this structure is internal.
- *
- * Use @ref unicoap_scheduled_event_t if you want the event to be executed with a delay.
- */
-typedef struct {
-    /**
-     * @brief Event to be posted to the internal event queue
-     * @internal
-     *
-     * This event stores the callback you provided to @ref unicoap_event_post
-     */
-    event_t super;
-
-    /**
-     * @brief Argument passed to the event callback
-     * @internal
-     *
-     */
-    void *arg;
-
-#if DEVELHELP || defined (DOXYGEN)
-    /**
-     * @brief Null-terminated event identifier used in debug logs
-     *
-     * Requires `DEVELHELP`
-     */
-    const char* name;
-#endif
-} unicoap_immediate_event_t;
-
-/**
- * @brief Name of immediate event
- * @returns Null-terminated string when `DEVELHELP` is turned on, `NULL` otherwise
- * @param event Immediate event
- */
-static inline const char* unicoap_immediate_event_name(unicoap_immediate_event_t* event) {
-    (void)event;
-#if DEVELHELP
-    return event->name;
-#else
-    return NULL;
-#endif
-}
-
-/**
- * @brief Immediate event callback
- *
- * @param[in] event Event containing argument provided during call to @ref unicoap_event_post
- */
-typedef void (*unicoap_immediate_event_callback_t)(unicoap_immediate_event_t* event);
-
-/**
- * @brief Post an event on the internal unicoap queue to be executed immediately
- *
- * @param[in,out] event The event to execute. Provide a pointer to a pre-allocated event
- * @param[in] callback Function pointer to be called on the internal queue as soon as possible
- * @param argument Argument passed to @p callback
- * @param[in] name A null-terminated string identifier to distinguish the event in debug logs
- *
- * @p name has no effect when `DEVELHELP` is disabled.
- */
-void unicoap_event_post(unicoap_immediate_event_t *event, unicoap_immediate_event_callback_t callback,
-                        void *argument, const char *name);
-
 /* MARK: - Event Scheduling */
 /**
  * @name Event Scheduling
@@ -203,6 +134,8 @@ typedef void (*unicoap_event_callback_t)(unicoap_scheduled_event_t* event);
 
 /**
  * @brief Schedules an event on the internal unicoap queue
+ *
+ * If you instead want to execute as soon as possible, use @ref unicoap_loop_enqueue instead.
  *
  * @param[in,out] event The event to schedule. Provide a pointer to a pre-allocated event
  * @param[in] callback Function pointer to be called on the internal queue after @p duration ms have elapses

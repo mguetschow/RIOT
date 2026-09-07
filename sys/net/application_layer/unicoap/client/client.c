@@ -453,6 +453,7 @@ int unicoap_send_request_sync(unicoap_message_t* request,
 }
 
 typedef struct {
+    unicoap_job_t job;
     unicoap_message_t* request;
     unicoap_destination_t* destination;
     unicoap_response_callback_t callback;
@@ -462,9 +463,9 @@ typedef struct {
     mutex_t roadblock;
 } _async_args_t;
 
-static void _async_callback(unicoap_immediate_event_t *event)
+static void _async_callback(unicoap_job_t *job)
 {
-    _async_args_t* a = (_async_args_t*)event->arg;
+    _async_args_t* a = container_of(job, _async_args_t, job);
     a->res = _open_request(a->request, a->destination,
         (unicoap_callback_t) { .response = a->callback }, a->parameters, a->flags);
     mutex_unlock(&a->roadblock);
@@ -481,8 +482,8 @@ int unicoap_send_request_async(unicoap_message_t* request,
             (unicoap_callback_t) { .response = callback }, parameters, flags);
     }
 
-    unicoap_immediate_event_t req_event;
     _async_args_t args = {
+        .job = UNICOAP_JOB(_async_callback),
         .request = request,
         .destination = destination,
         .callback = callback,
@@ -490,7 +491,7 @@ int unicoap_send_request_async(unicoap_message_t* request,
         .flags = flags,
         .roadblock = MUTEX_INIT_LOCKED,
     };
-    unicoap_event_post(&req_event, _async_callback, &args, "client.req");
+    unicoap_loop_enqueue(&args.job);
     /* Block until callback calls unlock. */
     mutex_lock(&args.roadblock);
     return args.res;

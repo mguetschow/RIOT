@@ -164,8 +164,8 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error) {
     if (unicoap_memo_messaging_state(&memo->super)) {
         unicoap_messaging_notify(
             unicoap_memo_messaging_state(&memo->super),
-            error ? unicoap_layer_notification_async_failure_from_errno(error) 
-                  : UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE, 
+            error ? unicoap_layer_notification_async_failure_from_errno(error)
+                  : UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE,
             NULL, proto);
     }
 #endif
@@ -272,7 +272,7 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
             unicoap_client_callback_failure(unicoap_client_memo_of_super(memo),
                 unicoap_layer_notification_async_failure_to_errno(type));
 
-            /* Messaging layer failed, our signal to release state. Error occurred on messaging 
+            /* Messaging layer failed, our signal to release state. Error occurred on messaging
              * layer and not on exchange layer, so use 0 instead of error number here. */
             unicoap_client_memo_free(unicoap_client_memo_of_super(memo), 0);
         }
@@ -314,24 +314,6 @@ void unicoap_messaging_notify(void* state, unicoap_layer_notification_t type, vo
 }
 
 /* MARK: - Event Scheduling on Internal Queue */
-
-void unicoap_event_post(unicoap_immediate_event_t *event, unicoap_immediate_event_callback_t callback,
-                        void *argument, const char *name)
-{
-    (void)name;
-#if DEVELHELP
-    assert(name);
-    event->name = name;
-#endif
-    if (IS_ACTIVE(DEVELHELP)) {
-        _STATE_EVENT_DEBUG("%s now\n", unicoap_immediate_event_name(event));
-    }
-    /* This cast is fine because (a) the return types are identical and the function argument is
-     * a pointer to a struct, too. */
-    event->super = (event_t){ .handler = (event_handler_t)callback };
-    event->arg = argument;
-    event_post(&_queue, &event->super);
-}
 
 static void _scheduled_event_callback(void* scheduled_event) {
     if (IS_ACTIVE(DEVELHELP)) {
