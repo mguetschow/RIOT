@@ -191,7 +191,10 @@ static int _open_request(unicoap_message_t* request,
                 request->options = options;
             }
             unicoap_endpoint_t endpoint = { 0 };
-            assert(uri_parser_is_absolute(destination->remote.uri, destination->_string_length));
+            if (!uri_parser_is_absolute(destination->remote.uri, destination->_string_length)) {
+                _URI_DEBUG("absolute URI expected\n");
+                return -EINVAL;
+            }
 
             uri_parser_result_t parsed = { 0 };
             if ((res = uri_parser_process(
