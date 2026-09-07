@@ -156,6 +156,7 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error) {
     memo->super.endpoint.proto = UNICOAP_PROTO_UNSPECIFIED;
     _unlock();
     _deinit_client(memo);
+    (void)error;
 #if UNICOAP_HAVE_MESSAGING_STATE
     /* On the exchange layer, we're hiding the actual reason from the driver. It should
      * not matter to the messaging layer whether we release state because of an error or because

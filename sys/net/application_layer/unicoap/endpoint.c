@@ -212,13 +212,14 @@ static int _populate_address(uri_parser_result_t* parsed, unicoap_endpoint_t* en
         if (parsed->host_len > CONFIG_UNICOAP_URI_HOST_PART_LENGTH_MAX) {
             _URI_DEBUG("no buffer space to copy '%.*s', " _UNICOAP_NEED_HAVE "\n",
                 (int)parsed->host_len, parsed->host,
-                parsed->host_len, CONFIG_UNICOAP_URI_HOST_PART_LENGTH_MAX);
+                (size_t)parsed->host_len, (size_t)CONFIG_UNICOAP_URI_HOST_PART_LENGTH_MAX);
         }
         char* domain = alloca(CONFIG_UNICOAP_URI_HOST_PART_LENGTH_MAX + 1);
         memcpy(domain, parsed->host, parsed->host_len);
         domain[parsed->host_len] = '\0';
 
-        if ((res = dns_query(domain, &tl_ep->addr, AF_UNSPEC)) < 0) {
+        int res;
+        if ((res = dns_query(domain, v6addr, AF_UNSPEC)) < 0) {
             _URI_DEBUG("DNS resolution of '%.*s' failed: %i\n",
                         (int)parsed->host_len, parsed->host, res);
             return res;
