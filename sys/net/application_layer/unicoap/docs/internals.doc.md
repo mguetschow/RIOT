@@ -75,7 +75,7 @@ using confirmable and acknowledgement messages.
 
 @see [RFC 7252](https://datatracker.ietf.org/doc/html/rfc7252)
 
-#### CoAP over TCP, CoAP over TLS, and CoAP over WebScokets (RFC 8323)
+#### CoAP over TCP, CoAP over TLS, and CoAP over WebSockets (RFC 8323)
 RFC 8323 eliminates the need for reliability to be implemented on the application layer, as the underlying
 transport protocol already provides reliability. While message processing looks the same for both
 CoAP over TCP/TLS ([RFC 8323, Section 3](https://datatracker.ietf.org/doc/html/rfc8323#section-3)) and
@@ -103,19 +103,19 @@ Drivers themselves can in turn consist of a shared module for messaging and a sp
 support module. For example, the CoAP over DTLS driver encompasses a transport module for DTLS networking;
 and depends on the common RFC 7252 messaging module also employed by the CoAP over UDP driver.
 You can see this relationship in `Makefile.dep` in the `unicoap` source directory: The common
-messaging module is a shared dependency of both the @ref net_unicoap_drivers_udp and @ref net_unicoap_drivers_dtls.
+messaging module is a shared dependency of both the @ref net_unicoap_drivers_udp and @ref net_unicoap_drivers_dtls
 driver module. We encourage you to follow the same approach for CoAP combinations that share a common
 messaging model, such as CoAP over TCP, TLS, and WebSockets when implementing these.
 
 On a high level, each driver interacts with the upper layers on these three occasions:
 
 - **Initialization and deinitialization**:
-  Drivers must provide an [initialization](/FIXME-upcoming-pr-unicoap_init) and [teardown](/FIXME-upcoming-pr-unicoap_deinit)
+  Drivers must provide an [initialization](@ref unicoap_init) and [teardown](@ref unicoap_deinit).
   These may be used for setup work in the transport and messaging layer such as for creating
   sockets or establishing connections to peripherals, alongside allocating objects required for messaging.
 
 - **Sending side / Outbound**:
-  A driver must expose a standardized API for [sending from the messaging layer](/FIXME-upcoming-pr-unicoap_messaging_send).
+  A driver must expose a standardized API for [sending from the messaging layer](@ref unicoap_messaging_send).
   The exchange layer will call into this functionality, prompting the driver to perform any due
   work in the messaging layer like attempting to retransmit the message. Apart from the message,
   as well as the remote and local endpoint, this function accepts flags that customize transmission
@@ -125,7 +125,7 @@ On a high level, each driver interacts with the upper layers on these three occa
   implementation.
 
 - **Receiving side / Inbound**:
-  Upon receipt of a new message, each driver will need to invoke an [exchange-layer processing function](/FIXME-upcoming-pr-unicoap_exchange_process).
+  Upon receipt of a new message, each driver will need to invoke an [exchange-layer processing function](@ref unicoap_exchange_process).
 
 - **Ping**: Due to the variability in ping mechanisms (empty `CON` in CoAP over UDP and `7.03` message in CoAP over reliable transports), each driver can implement a ping function. unicoap bundles these APIs and provides a [single, generic ping function that multiplexes](/FIXME-upcoming-pr-unicoap_ping) between the driver implementations.
 
@@ -133,8 +133,8 @@ On a high level, each driver interacts with the upper layers on these three occa
 
 The following figure illustrates communication between layers in a block-wise transfer,
 where a client request from the application may result in multiple
-[`unicoap_messaging_send`](/FIXME-upcoming-pr-unicoap_messaging_send) and
-[`unicoap_exchange_process`](/FIXME-upcoming-pr-unicoap_exchange_process) calls between the
+[`unicoap_messaging_send`](@ref unicoap_messaging_send) and
+[`unicoap_exchange_process`](@ref unicoap_exchange_process) calls between the
 exchange and messaging layer:
 
 <img src="unicoap-layers-comms.svg" alt="Figure 3: Communication between layers" width="600em"/>
