@@ -346,10 +346,9 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
                                    unicoap_aux_t* aux)
 {
     assert(response);
-    assert(response);
 
     /* Prevent this function from deadlocking the unicoap thread. No one besides the unicoap
-     * thread can unlock the mutex below (via the _sync_callback). You cannot have
+     * thread can unlock the mutex below (via the _copy_callback). You cannot have
      * a function that waits for the response to arrive while blocking the very same
      * thread would process the response.
      *
@@ -372,18 +371,18 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
         .roadblock = MUTEX_INIT_LOCKED
     };
 
-    unicoap_request_parameters_t sync_copy_parameters = {};
+    unicoap_request_parameters_t _parameters = {};
     if (parameters) {
-        sync_copy_parameters = *parameters;
+        _parameters = *parameters;
     }
-    sync_copy_parameters.callback_arg = &args;
+    _parameters.callback_arg = &args;
 
-    int res = _open_request(request, destination,
-        (unicoap_callback_t) { .response = _copy_callback }, &sync_copy_parameters, flags);
-
+    int res = unicoap_send_request_async(request, destination,
+        _copy_callback, &_parameters, flags);
     if (res < 0) {
         return res;
     }
+
     /* Block until callback calls unlock. */
     mutex_lock(&args.roadblock);
     return args.res;
@@ -391,7 +390,7 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
 
 typedef struct {
     unicoap_response_callback_t callback;
-    void *caller_arg;
+    void *callback_arg;
     int res;
     mutex_t roadblock;
 } _sync_args_t;
@@ -400,7 +399,7 @@ static int _sync_callback(const unicoap_message_t *response, const unicoap_aux_t
                           void *args)
 {
     _sync_args_t* a = (_sync_args_t*)args;
-    a->res = a->callback(response, aux, error, a->caller_arg);
+    a->res = a->callback(response, aux, error, a->callback_arg);
     mutex_unlock(&a->roadblock);
     return 0;
 }
@@ -434,19 +433,19 @@ int unicoap_send_request_sync(unicoap_message_t* request,
         .roadblock = MUTEX_INIT_LOCKED
     };
 
-    unicoap_request_parameters_t sync_parameters = {};
+    unicoap_request_parameters_t _parameters = {};
     if (parameters) {
-        args.caller_arg = parameters->callback_arg;
-        sync_parameters = *parameters;
+        args.callback_arg = parameters->callback_arg;
+        _parameters = *parameters;
     }
-    sync_parameters.callback_arg = &args;
+    _parameters.callback_arg = &args;
 
-    int res = _open_request(request, destination,
-        (unicoap_callback_t) { .response = _sync_callback }, &sync_parameters, flags);
-
+    int res = unicoap_send_request_async(request, destination,
+        _sync_callback, &_parameters, flags);
     if (res < 0) {
         return res;
     }
+
     /* Block until callback calls unlock. */
     mutex_lock(&args.roadblock);
     return args.res;
