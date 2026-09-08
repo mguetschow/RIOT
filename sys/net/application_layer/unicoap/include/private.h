@@ -126,12 +126,6 @@ void unicoap_assist_emit_diagnostic_missing_driver(unicoap_proto_t proto);
 /** @brief Name of background thread spawned upon calls to @ref unicoap_init */
 #define UNICOAP_THREAD_IDENTIFIER "unicoap"
 
-/** @brief Locks internal state lock */
-void unicoap_state_lock(void);
-
-/** @brief Unlocks internal state lock */
-void unicoap_state_unlock(void);
-
 /** @brief PID of `unicoap` thread */
 extern kernel_pid_t _unicoap_pid;
 /** @} */
@@ -145,11 +139,6 @@ extern kernel_pid_t _unicoap_pid;
  * @brief Container the unicoap stacks keeps state in
  */
 typedef struct {
-    /**
-     * @brief Used when allocating listener, transaction, carbon copy, observer, or registration
-     */
-    mutex_t lock;
-
 #if IS_USED(MODULE_UNICOAP_SERVER) || defined(DOXYGEN)
     /** @brief Groups of resources */
     unicoap_listener_t* listeners;

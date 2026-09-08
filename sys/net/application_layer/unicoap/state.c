@@ -61,28 +61,7 @@ static event_queue_t _queue;
 
 /* MARK: - State */
 
-static inline void _lock(void)
-{
-    mutex_lock(&_state.lock);
-}
-
-static inline void _unlock(void)
-{
-    mutex_unlock(&_state.lock);
-}
-
-void unicoap_state_lock(void)
-{
-    _lock();
-}
-
-void unicoap_state_unlock(void)
-{
-    _unlock();
-}
-
-static unicoap_client_memo_t* _alloc_client(void)
-{
+static unicoap_client_memo_t* _alloc_client(void) {
 #if UNICOAP_HAVE_CLIENT_STATE
     /* Find empty slot in list of transactions */
     for (int i = 0; i < (int)ARRAY_SIZE(_state.client_memos); i += 1) {
@@ -140,13 +119,11 @@ unicoap_client_memo_t* unicoap_client_memo_create(const unicoap_endpoint_t* endp
     }
     assert(endpoint);
     assert(endpoint->proto != UNICOAP_PROTO_UNSPECIFIED);
-    _lock();
     unicoap_client_memo_t* memo = _alloc_client();
     if (memo) {
         _STATE_DEBUG("[client #%" PRIuSIZE "] alloc\n", _client_index(memo));
         memo->super.endpoint = *endpoint;
     }
-    _unlock();
     return memo;
 }
 
@@ -161,13 +138,9 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error)
     if (!UNICOAP_HAVE_CLIENT_STATE) {
         return;
     }
-    _lock();
-    /* Mark as unused, such that all the logic below can run without a lock.
-      * The messaging layer may need the lock too. */
     unicoap_proto_t proto = memo->super.endpoint.proto;
     (void)proto;
     memo->super.endpoint.proto = UNICOAP_PROTO_UNSPECIFIED;
-    _unlock();
     // todo: this is a race condition in case client is alloced somewhere else, then deinit'ed here!
     _deinit_client(memo);
     (void)error;
@@ -267,7 +240,6 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
         _STATE_NOTIF_DEBUG("use of released state obj\n");
         return;
     }
-    _lock();
     if (type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE) {
         _STATE_NOTIF_DEBUG("messaging layer encountered error %i (type %i)\n",
                            unicoap_layer_notification_async_failure_to_errno(type), type);
@@ -288,7 +260,6 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
         memo->messaging.state = arg;
 #endif
     }
-    _unlock();
 
     if (IS_USED(MODULE_UNICOAP_CLIENT) && _is_client(memo)) {
         if (type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE) {
@@ -470,8 +441,6 @@ kernel_pid_t unicoap_init(void)
     if (_unicoap_pid != KERNEL_PID_UNDEF) {
         return -EEXIST;
     }
-
-    mutex_init(&_state.lock);
 
 #if IS_USED(MODULE_UNICOAP_SERVER_RESOURCE_DECLARATIONS)
     /* add CoAP resources from XFA */
