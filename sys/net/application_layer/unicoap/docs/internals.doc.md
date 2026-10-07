@@ -149,8 +149,11 @@ suffixes in the function names depicted in the figure above.
 
 To manage state, the exchange and messaging layer(s) exchange notifications composed of a
 notification type and an opaque state object pointer that may point to the layer-internal
-state object representation. Notifications are sent using @ref unicoap_messaging_notify
-and @ref unicoap_exchange_notify. The notification system serves two purposes.
+state object representation. Notifications (@ref unicoap_layer_notification_t)
+are sent using @ref unicoap_messaging_notify and @ref unicoap_exchange_notify.
+The notification system serves two purposes.
+
+#### State Lifecycle Notifications
 
 First, it informs the respective other layer about the allocation and release of owned state
 objects, such that a layer A can decide whether it should also release state when
@@ -166,10 +169,12 @@ may, in turn, encompass multiple _transmissions_ on the messaging layer in the c
 transfer. Once the messaging layer has sent a state release notification to the exchange layer,
 the exchange layer may also release its memo if the block-wise transfer is done or keeps the memo
 otherwise. Each time a new CoAP message is sent, the messaging layer informs the exchange layer
-of any new state object allocations such that the current messaging state reference in the memo
+of any new state object allocation such that the current messaging state reference in the memo
 can be set.
 
-Second, it allows one layer to propagate errors that occurred asynchronously.
+#### Error Notifications
+
+Second, notifications allows one layer to propagate errors that occurred asynchronously.
 This case is called _asynchronous failure_ as synchronous failures,
 i.e., those originating from a function call from the other layer, must be propagated by returning
 an error instead. This is usually done by returning a negative error number, but you should check

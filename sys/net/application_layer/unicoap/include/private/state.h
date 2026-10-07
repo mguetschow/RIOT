@@ -267,6 +267,12 @@ static inline unicoap_memo_t* unicoap_memo_of_event(event_t* event) {
 
 /**
  * @brief A signal sent from one layer to another indicating a change to a state object
+ *
+ * @see @ref UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE
+ * @see @ref UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC
+ * @see @ref UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE
+ * @see @ref unicoap_layer_notification_async_failure_to_errno
+ * @see @ref unicoap_layer_notification_async_failure_from_errno
  */
 typedef int unicoap_layer_notification_t;
 
