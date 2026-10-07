@@ -12,13 +12,13 @@
  */
 
 #include <errno.h>
-#include "container.h"
-#include "thread.h"
-#include "sched.h"
-#include "random.h"
-#include "event.h"
 
+#include "container.h"
+#include "event.h"
 #include "net/unicoap/config.h"
+#include "random.h"
+#include "sched.h"
+#include "thread.h"
 
 #define ENABLE_DEBUG CONFIG_UNICOAP_DEBUG_LOGGING
 #include "debug.h"
@@ -60,23 +60,28 @@ static event_queue_t _queue;
 
 /* MARK: - State */
 
-static inline void _lock(void) {
+static inline void _lock(void)
+{
     mutex_lock(&_state.lock);
 }
 
-static inline void _unlock(void) {
+static inline void _unlock(void)
+{
     mutex_unlock(&_state.lock);
 }
 
-void unicoap_state_lock(void) {
+void unicoap_state_lock(void)
+{
     _lock();
 }
 
-void unicoap_state_unlock(void) {
+void unicoap_state_unlock(void)
+{
     _unlock();
 }
 
-static unicoap_client_memo_t* _alloc_client(void) {
+static unicoap_client_memo_t* _alloc_client(void)
+{
 #if UNICOAP_HAVE_CLIENT_STATE
     /* Find empty slot in list of transactions */
     for (int i = 0; i < (int)ARRAY_SIZE(_state.client_memos); i += 1) {
@@ -89,17 +94,19 @@ static unicoap_client_memo_t* _alloc_client(void) {
     return NULL;
 }
 
-static inline bool _is_client(const unicoap_memo_t* memo) {
+static inline bool _is_client(const unicoap_memo_t* memo)
+{
     (void)memo;
 #if UNICOAP_HAVE_CLIENT_STATE
     return (uintptr_t)memo >= (uintptr_t)&_state.client_memos[0] &&
-        (uintptr_t)memo <= (uintptr_t)&_state.client_memos[ARRAY_SIZE(_state.client_memos) - 1];
+           (uintptr_t)memo <= (uintptr_t)&_state.client_memos[ARRAY_SIZE(_state.client_memos) - 1];
 #else
     return false;
 #endif
 }
 
-static inline size_t _client_index(unicoap_client_memo_t* memo) {
+static inline size_t _client_index(unicoap_client_memo_t* memo)
+{
     /* debugging-only */
 #if UNICOAP_HAVE_CLIENT_STATE
     return ((uintptr_t)memo - (uintptr_t)_state.client_memos) / sizeof(*_state.client_memos);
@@ -110,7 +117,8 @@ static inline size_t _client_index(unicoap_client_memo_t* memo) {
 #endif
 }
 
-static void _deinit_client(unicoap_client_memo_t* memo) {
+static void _deinit_client(unicoap_client_memo_t* memo)
+{
     if (!UNICOAP_HAVE_CLIENT_STATE) {
         return;
     }
@@ -123,7 +131,8 @@ static void _deinit_client(unicoap_client_memo_t* memo) {
 #endif
 }
 
-unicoap_client_memo_t* unicoap_client_memo_create(const unicoap_endpoint_t* endpoint) {
+unicoap_client_memo_t* unicoap_client_memo_create(const unicoap_endpoint_t* endpoint)
+{
     if (!UNICOAP_HAVE_CLIENT_STATE) {
         return NULL;
     }
@@ -139,12 +148,14 @@ unicoap_client_memo_t* unicoap_client_memo_create(const unicoap_endpoint_t* endp
     return memo;
 }
 
-static void _free(unicoap_memo_t* memo) {
+static void _free(unicoap_memo_t* memo)
+{
     unicoap_event_cancel(&memo->exchange.timeout);
     memset(memo, 0, sizeof(*memo));
 }
 
-void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error) {
+void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error)
+{
     if (!UNICOAP_HAVE_CLIENT_STATE) {
         return;
     }
@@ -165,8 +176,7 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error) {
     if (unicoap_memo_messaging_state(&memo->super)) {
         unicoap_messaging_notify(
             unicoap_memo_messaging_state(&memo->super),
-            error ? unicoap_layer_notification_async_failure_from_errno(error)
-                  : UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE,
+            error ? unicoap_layer_notification_async_failure_from_errno(error) : UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE,
             NULL, proto);
     }
 #endif
@@ -174,7 +184,8 @@ void unicoap_client_memo_free(unicoap_client_memo_t* memo, int error) {
 }
 
 unicoap_client_memo_t* unicoap_client_memo_find_token(const unicoap_endpoint_t* endpoint,
-                                                  const uint8_t* token, size_t token_length) {
+                                                      const uint8_t* token, size_t token_length)
+{
     (void)endpoint;
     (void)token;
     (void)token_length;
@@ -195,9 +206,10 @@ unicoap_client_memo_t* unicoap_client_memo_find_token(const unicoap_endpoint_t* 
 }
 
 #define UNICOAP_REFNO_MASK_MIN_INDEX (0x7000)
-#define UNICOAP_REFNO_MASK_ID (0xfff)
+#define UNICOAP_REFNO_MASK_ID        (0xfff)
 
-unicoap_client_memo_t* unicoap_client_memo_find_refno(int refno) {
+unicoap_client_memo_t* unicoap_client_memo_find_refno(int refno)
+{
     assert(refno > 0);
     (void)refno;
 #if IS_USED(MODULE_UNICOAP_CLIENT_CANCELLATION)
@@ -218,7 +230,8 @@ unicoap_client_memo_t* unicoap_client_memo_find_refno(int refno) {
     return NULL;
 }
 
-int unicoap_client_memo_assign_refno(unicoap_client_memo_t* memo) {
+int unicoap_client_memo_assign_refno(unicoap_client_memo_t* memo)
+{
     (void)memo;
     assert(memo);
 #if IS_USED(MODULE_UNICOAP_CLIENT_CANCELLATION)
@@ -229,19 +242,22 @@ int unicoap_client_memo_assign_refno(unicoap_client_memo_t* memo) {
      * Since 3 bits represent a maximum value of 7, we store the minimum index instead of the full
      * size_t. This provides O(1) lookup for up to 7 memos and narrows the search space for larger
      * arrays. */
-    memo->reference_id = random_uint32_range(1, 0xfff); /* 12 bits for reference ID */
+    memo->reference_id = random_uint32_range(1, 0xfff);                     /* 12 bits for reference ID */
     int refno = memo->reference_id | (MIN(_client_index(memo), 0x7) << 12); /* 3 bits min index */
     _STATE_DEBUG("assign refno=%i (min_client_ix=#%" PRIuSIZE ", refid=%u)\n",
-        refno, MIN(_client_index(memo), 0x7), memo->reference_id);
+                 refno, MIN(_client_index(memo), 0x7), memo->reference_id);
     return refno;
 #else
     return 0;
 #endif
 }
 
-void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, void* arg) {
+void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, void* arg)
+{
     (void)arg;
-    if (!state) { return; }
+    if (!state) {
+        return;
+    }
     unicoap_memo_t* memo = (unicoap_memo_t*)state;
     if (memo->endpoint.proto == UNICOAP_PROTO_UNSPECIFIED) {
         _STATE_NOTIF_DEBUG("use of released state obj\n");
@@ -250,16 +266,18 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
     _lock();
     if (type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE) {
         _STATE_NOTIF_DEBUG("messaging layer encountered error %i (type %i)\n",
-            unicoap_layer_notification_async_failure_to_errno(type), type);
+                           unicoap_layer_notification_async_failure_to_errno(type), type);
 #if UNICOAP_HAVE_MESSAGING_STATE
         memo->messaging.state = NULL;
 #endif
-    } else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE) {
+    }
+    else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE) {
         _STATE_NOTIF_DEBUG("messaging layer released state (type %i)\n", type);
 #if UNICOAP_HAVE_MESSAGING_STATE
         memo->messaging.state = NULL;
 #endif
-    } else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC) {
+    }
+    else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC) {
         _STATE_NOTIF_DEBUG("messaging layer allocated state (type %i)\n", type);
         assert(arg);
 #if UNICOAP_HAVE_MESSAGING_STATE
@@ -271,7 +289,7 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
     if (IS_USED(MODULE_UNICOAP_CLIENT) && _is_client(memo)) {
         if (type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE) {
             unicoap_client_callback_failure(unicoap_client_memo_of_super(memo),
-                unicoap_layer_notification_async_failure_to_errno(type));
+                                            unicoap_layer_notification_async_failure_to_errno(type));
 
             /* Messaging layer failed, our signal to release state. Error occurred on messaging
              * layer and not on exchange layer, so use 0 instead of error number here. */
@@ -280,7 +298,8 @@ void unicoap_exchange_notify(void* state, unicoap_layer_notification_t type, voi
     }
 }
 
-void unicoap_exchange_notify_all(const unicoap_endpoint_t* endpoint, unicoap_layer_notification_t type, void* arg) {
+void unicoap_exchange_notify_all(const unicoap_endpoint_t* endpoint, unicoap_layer_notification_t type, void* arg)
+{
     unicoap_memo_t* memo = NULL;
     (void)memo;
     (void)endpoint;
@@ -296,43 +315,48 @@ void unicoap_exchange_notify_all(const unicoap_endpoint_t* endpoint, unicoap_lay
 #endif
 }
 
-void unicoap_messaging_notify(void* state, unicoap_layer_notification_t type, void* arg, unicoap_proto_t proto) {
+void unicoap_messaging_notify(void* state, unicoap_layer_notification_t type, void* arg, unicoap_proto_t proto)
+{
     assert(proto != UNICOAP_PROTO_UNSPECIFIED);
-    if (!state) { return; }
+    if (!state) {
+        return;
+    }
     (void)arg;
     (void)type;
     switch (proto) {
 #if IS_USED(MODULE_UNICOAP_DRIVER_RFC7252_COMMON)
-        case UNICOAP_PROTO_UDP:
-        case UNICOAP_PROTO_DTLS: {
-            extern void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t type);
-            return unicoap_messaging_notify_rfc7252(state, type);
-        }
+    case UNICOAP_PROTO_UDP:
+    case UNICOAP_PROTO_DTLS: {
+        extern void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t type);
+        return unicoap_messaging_notify_rfc7252(state, type);
+    }
 #endif
-        default:
-            break;
+    default:
+        break;
     }
 }
 
 /* MARK: - Event Scheduling on Internal Queue */
 
-static void _scheduled_event_callback(void* scheduled_event) {
+static void _scheduled_event_callback(void* scheduled_event)
+{
     if (IS_ACTIVE(DEVELHELP)) {
         _STATE_EVENT_DEBUG("%s fired, exec queued\n", unicoap_scheduled_event_name(
-                           unicoap_scheduled_event_of_event((event_t*)scheduled_event)));
+                                                          unicoap_scheduled_event_of_event((event_t*)scheduled_event)));
     }
     event_post(&_queue, (event_t*)scheduled_event);
 }
 
 void unicoap_event_schedule(unicoap_scheduled_event_t* event, unicoap_event_callback_t callback,
-                            uint32_t duration, const char* name) {
+                            uint32_t duration, const char* name)
+{
     (void)name;
 #if DEVELHELP
     assert(name);
     event->name = name;
 #endif
     if (IS_ACTIVE(DEVELHELP)) {
-        _STATE_EVENT_DEBUG("%s in %"PRIu32"ms\n", unicoap_scheduled_event_name(event), duration);
+        _STATE_EVENT_DEBUG("%s in %" PRIu32 "ms\n", unicoap_scheduled_event_name(event), duration);
     }
     event->ztimer.callback = _scheduled_event_callback;
     event->ztimer.arg = (void*)event;
@@ -342,15 +366,17 @@ void unicoap_event_schedule(unicoap_scheduled_event_t* event, unicoap_event_call
     ztimer_set(UNICOAP_CLOCK, &event->ztimer, duration);
 }
 
-void unicoap_event_reschedule(unicoap_scheduled_event_t* event, uint32_t duration) {
+void unicoap_event_reschedule(unicoap_scheduled_event_t* event, uint32_t duration)
+{
     if (IS_ACTIVE(DEVELHELP)) {
-        _STATE_EVENT_DEBUG("%s in %"PRIu32"ms (rescheduled)\n",
+        _STATE_EVENT_DEBUG("%s in %" PRIu32 "ms (rescheduled)\n",
                            unicoap_scheduled_event_name(event), duration);
     }
     ztimer_set(UNICOAP_CLOCK, &event->ztimer, duration);
 }
 
-void unicoap_event_cancel(unicoap_scheduled_event_t* event) {
+void unicoap_event_cancel(unicoap_scheduled_event_t* event)
+{
     if (!event->super.handler) {
         return;
     }
@@ -359,7 +385,7 @@ void unicoap_event_cancel(unicoap_scheduled_event_t* event) {
     }
     bool triggered = !ztimer_remove(UNICOAP_CLOCK, &event->ztimer);
     if (triggered) {
-    /* event cancel runs in O(n), so we really only want to call
+        /* event cancel runs in O(n), so we really only want to call
      * event_cancel if the event has already been posted */
         event_cancel(&_queue, &event->super);
     }
@@ -371,7 +397,8 @@ void unicoap_event_cancel(unicoap_scheduled_event_t* event) {
 
 /* MARK: - Lifecycle */
 
-static inline int _init_drivers(event_queue_t* queue) {
+static inline int _init_drivers(event_queue_t* queue)
+{
     (void)queue;
 #if IS_USED(MODULE_UNICOAP_DRIVER_RFC7252_COMMON)
     if (unicoap_init_rfc7252_common(queue) < 0) {
@@ -397,7 +424,8 @@ static inline int _init_drivers(event_queue_t* queue) {
     return 0;
 }
 
-static inline int _deinit_drivers(event_queue_t* queue) {
+static inline int _deinit_drivers(event_queue_t* queue)
+{
     (void)queue;
     int res = 0;
 #if IS_USED(MODULE_UNICOAP_DRIVER_RFC7252_COMMON)
@@ -416,7 +444,8 @@ static inline int _deinit_drivers(event_queue_t* queue) {
     return res;
 }
 
-void* _unicoap_loop_run(void* arg) {
+void* _unicoap_loop_run(void* arg)
+{
     (void)arg;
     /* Now we set the already-initialized queue's waiter thread. See unicoap_init below. */
     /* _queue.waiter == NULL is asserted by event_queue_claim */
@@ -426,12 +455,14 @@ void* _unicoap_loop_run(void* arg) {
     return &_queue;
 }
 
-int unicoap_loop_enqueue(unicoap_job_t* job) {
+int unicoap_loop_enqueue(unicoap_job_t* job)
+{
     event_post(&_queue, &job->super);
     return 0;
 }
 
-kernel_pid_t unicoap_init(void) {
+kernel_pid_t unicoap_init(void)
+{
     if (_unicoap_pid != KERNEL_PID_UNDEF) {
         return -EEXIST;
     }
@@ -467,7 +498,8 @@ kernel_pid_t unicoap_init(void) {
     return _unicoap_pid;
 }
 
-int unicoap_deinit(void) {
+int unicoap_deinit(void)
+{
     if (_unicoap_pid == KERNEL_PID_UNDEF) {
         return -ENOENT;
     }
@@ -482,7 +514,8 @@ int unicoap_deinit(void) {
 
 // MARK: - Listeners
 
-void unicoap_listener_register(unicoap_listener_t* listener) {
+void unicoap_listener_register(unicoap_listener_t* listener)
+{
     assert(listener);
     /* That item will be overridden, ensure that the user expecting different
      * behavior will notice this. */
@@ -505,7 +538,7 @@ void unicoap_listener_register(unicoap_listener_t* listener) {
                 unicoap_print_resource(&listener->resources[i]);
                 printf(":\n");
                 unicoap_assist(API_WARNING("resource definition is inaccessible")
-                               FIXIT("Set .methods"));
+                                   FIXIT("Set .methods"));
             }
 
             /* TODO: Advanced features: emit warnings */
@@ -513,7 +546,8 @@ void unicoap_listener_register(unicoap_listener_t* listener) {
     }
 }
 
-int unicoap_listener_deregister(unicoap_listener_t* listener) {
+int unicoap_listener_deregister(unicoap_listener_t* listener)
+{
     assert(listener);
 
     unicoap_listener_t* current = unicoap_get_listeners(&_state);
@@ -534,7 +568,8 @@ int unicoap_listener_deregister(unicoap_listener_t* listener) {
 
 /* MARK: - Intersection with messaging */
 
-void unicoap_generate_token(uint8_t* token) {
+void unicoap_generate_token(uint8_t* token)
+{
     for (size_t i = 0; i < CONFIG_UNICOAP_GENERATED_TOKEN_LENGTH; i += 4) {
         uint32_t _random = random_uint32_range(1, UINT32_MAX);
         memcpy(&token[i], &_random,
@@ -544,7 +579,8 @@ void unicoap_generate_token(uint8_t* token) {
     }
 }
 
-static void _debug_packet(const unicoap_packet_t* packet) {
+static void _debug_packet(const unicoap_packet_t* packet)
+{
     DEBUG("in channel:");
 
     DEBUG("\n\tremote=");
@@ -558,7 +594,8 @@ static void _debug_packet(const unicoap_packet_t* packet) {
     DEBUG("\n");
 }
 
-int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t flags, void* exchange) {
+int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t flags, void* exchange)
+{
     (void)packet;
     (void)flags;
     (void)exchange;
@@ -580,7 +617,7 @@ int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t f
     /* MARK: unicoap_driver_extension_point */
     default:
         _MESSAGING_DEBUG("missing driver for proto %s\n",
-                        unicoap_string_from_proto(unicoap_packet_proto(packet)));
+                         unicoap_string_from_proto(unicoap_packet_proto(packet)));
         unicoap_assist_emit_diagnostic_missing_driver(packet->remote->proto);
         return -ENOTSUP;
     }
@@ -589,7 +626,8 @@ int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t f
 unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* packet,
                                                            unicoap_messaging_flags_t* flags,
                                                            unicoap_exchange_arg_t* arg,
-                                                           bool truncated) {
+                                                           bool truncated)
+{
     *flags = UNICOAP_MESSAGING_FLAGS_DEFAULT;
     unicoap_message_t* message = packet->message;
     int res = 0;
@@ -614,14 +652,15 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
             const unicoap_listener_t* listener = NULL;
             if ((res = unicoap_resource_find(packet, &resource, &listener)) != 0) {
                 unicoap_response_init_empty(message, res < 0 ? UNICOAP_STATUS_INTERNAL_SERVER_ERROR :
-                                            (unicoap_status_t)res);
+                                                               (unicoap_status_t)res);
                 unicoap_messaging_send(packet, UNICOAP_MESSAGING_FLAGS_DEFAULT, NULL);
                 return UNICOAP_PREPROCESSING_ERROR_REQUEST;
             }
             arg->resource = resource;
             *flags = _messaging_flags_resource(resource->flags);
             return UNICOAP_PREPROCESSING_SUCCESS_REQUEST;
-        } else {
+        }
+        else {
             return UNICOAP_PREPROCESSING_ERROR_UNSUPPORTED;
         }
     }
@@ -636,7 +675,7 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
                 remote = NULL;
             }
             unicoap_client_memo_t* memo = unicoap_client_memo_find_token(remote,
-                packet->properties.token, packet->properties.token_length);
+                                                                         packet->properties.token, packet->properties.token_length);
 
             if (!memo) {
                 if (unicoap_options_contains(packet->message->options, UNICOAP_OPTION_OBSERVE)) {
@@ -660,7 +699,8 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
             arg->client = memo;
             *flags = _messaging_flags_client(memo->flags);
             return UNICOAP_PREPROCESSING_SUCCESS_RESPONSE;
-        } else {
+        }
+        else {
             return UNICOAP_PREPROCESSING_ERROR_UNSUPPORTED;
         }
     }
@@ -675,32 +715,36 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
     }
 }
 
-int unicoap_exchange_process(unicoap_packet_t* packet, unicoap_exchange_arg_t arg) {
+int unicoap_exchange_process(unicoap_packet_t* packet, unicoap_exchange_arg_t arg)
+{
     switch (unicoap_code_class(packet->message->code)) {
-        case UNICOAP_CODE_CLASS_REQUEST:
-            return IS_USED(MODULE_UNICOAP_SERVER) ?
-                unicoap_server_process_request(packet, arg.resource) : -ENOTSUP;
+    case UNICOAP_CODE_CLASS_REQUEST:
+        return IS_USED(MODULE_UNICOAP_SERVER) ?
+                   unicoap_server_process_request(packet, arg.resource) :
+                   -ENOTSUP;
 
-        case UNICOAP_CODE_CLASS_RESPONSE_SUCCESS:
-        case UNICOAP_CODE_CLASS_RESPONSE_CLIENT_FAILURE:
-        case UNICOAP_CODE_CLASS_RESPONSE_SERVER_FAILURE:
-            return IS_USED(MODULE_UNICOAP_CLIENT) ?
-                unicoap_client_process_response(packet, arg.client) : -ENOTSUP;
+    case UNICOAP_CODE_CLASS_RESPONSE_SUCCESS:
+    case UNICOAP_CODE_CLASS_RESPONSE_CLIENT_FAILURE:
+    case UNICOAP_CODE_CLASS_RESPONSE_SERVER_FAILURE:
+        return IS_USED(MODULE_UNICOAP_CLIENT) ?
+                   unicoap_client_process_response(packet, arg.client) :
+                   -ENOTSUP;
 
-        case UNICOAP_CODE_CLASS_SIGNAL:
-            /* TODO: Signaling */
-            return -1;
+    case UNICOAP_CODE_CLASS_SIGNAL:
+        /* TODO: Signaling */
+        return -1;
 
-        default:
-            UNREACHABLE();
-            return -1;
+    default:
+        UNREACHABLE();
+        return -1;
     }
 }
 
 /* These must be in state.c as it reads the _state object. */
 
 ssize_t unicoap_resource_core_link_format_build(char* buffer, size_t capacity,
-                                                unicoap_proto_t proto) {
+                                                unicoap_proto_t proto)
+{
     unicoap_listener_t* listener = unicoap_get_listeners(&_state);
 
     char* out = (char*)buffer;
@@ -750,7 +794,8 @@ ssize_t unicoap_resource_core_link_format_build(char* buffer, size_t capacity,
 }
 
 int unicoap_resource_find(const unicoap_packet_t* packet, const unicoap_resource_t** resource_ptr,
-                          const unicoap_listener_t** listener_ptr) {
+                          const unicoap_listener_t** listener_ptr)
+{
     assert(packet);
     int ret = UNICOAP_STATUS_PATH_NOT_FOUND;
 
@@ -767,51 +812,51 @@ int unicoap_resource_find(const unicoap_packet_t* packet, const unicoap_resource
 
             res = listener->request_matcher(listener, &resource, packet->message, packet->remote);
             switch (res) {
-                case UNICOAP_STATUS_PATH_NOT_FOUND:
-                    /* check next resource on mismatch */
-                    continue;
-                case UNICOAP_STATUS_METHOD_NOT_ALLOWED:
-                    *resource_ptr = resource;
-                    *listener_ptr = listener;
-                    ret = res;
-                    /* found a resource, but method/proto do not match */
-                    continue;
-                case 0:
-                    *resource_ptr = resource;
-                    *listener_ptr = listener;
+            case UNICOAP_STATUS_PATH_NOT_FOUND:
+                /* check next resource on mismatch */
+                continue;
+            case UNICOAP_STATUS_METHOD_NOT_ALLOWED:
+                *resource_ptr = resource;
+                *listener_ptr = listener;
+                ret = res;
+                /* found a resource, but method/proto do not match */
+                continue;
+            case 0:
+                *resource_ptr = resource;
+                *listener_ptr = listener;
 
-                    if (IS_ACTIVE(ENABLE_DEBUG)) {
-                        _SERVER_DEBUG("<");
-                        unicoap_print_path(&resource->path);
-                        DEBUG("%s>: found\n",
-                              (*resource_ptr)->flags & UNICOAP_RESOURCE_FLAG_MATCH_SUBTREE ? "/**" : "");
-                    }
+                if (IS_ACTIVE(ENABLE_DEBUG)) {
+                    _SERVER_DEBUG("<");
+                    unicoap_print_path(&resource->path);
+                    DEBUG("%s>: found\n",
+                          (*resource_ptr)->flags & UNICOAP_RESOURCE_FLAG_MATCH_SUBTREE ? "/**" : "");
+                }
 
-                    return 0;
-                default:
-                    _SERVER_DEBUG("error: resource matcher failed\n");
-                    /* res is probably UNICOAP_RESOURCE_ERROR or some other
+                return 0;
+            default:
+                _SERVER_DEBUG("error: resource matcher failed\n");
+                /* res is probably UNICOAP_RESOURCE_ERROR or some other
                      * unhandled error */
-                    return res;
+                return res;
             }
         }
 
         if (IS_ACTIVE(ENABLE_DEBUG)) {
             switch (ret) {
-                case UNICOAP_STATUS_METHOD_NOT_ALLOWED:
-                    _SERVER_DEBUG("<");
-                    unicoap_print_path(&(*resource_ptr)->path);
-                    DEBUG("%s>: method %s not allowed\n",
-                          (*resource_ptr)->flags & UNICOAP_RESOURCE_FLAG_MATCH_SUBTREE ? "/**" : "",
-                          unicoap_string_from_method(unicoap_request_get_method(packet->message)));
-                    break;
-                case UNICOAP_STATUS_PATH_NOT_FOUND:
-                    _SERVER_DEBUG("<");
-                    unicoap_options_print_uri_path(packet->message->options);
-                    DEBUG(">: resource not found\n");
-                    break;
-                default:
-                    break;
+            case UNICOAP_STATUS_METHOD_NOT_ALLOWED:
+                _SERVER_DEBUG("<");
+                unicoap_print_path(&(*resource_ptr)->path);
+                DEBUG("%s>: method %s not allowed\n",
+                      (*resource_ptr)->flags & UNICOAP_RESOURCE_FLAG_MATCH_SUBTREE ? "/**" : "",
+                      unicoap_string_from_method(unicoap_request_get_method(packet->message)));
+                break;
+            case UNICOAP_STATUS_PATH_NOT_FOUND:
+                _SERVER_DEBUG("<");
+                unicoap_options_print_uri_path(packet->message->options);
+                DEBUG(">: resource not found\n");
+                break;
+            default:
+                break;
             }
         }
     }
@@ -819,7 +864,8 @@ int unicoap_resource_find(const unicoap_packet_t* packet, const unicoap_resource
     return ret;
 }
 
-void unicoap_print_listeners(void) {
+void unicoap_print_listeners(void)
+{
     if (IS_USED(MODULE_UNICOAP_SERVER)) {
         printf("\n\t- listeners:\n");
         size_t i = 0;

@@ -11,8 +11,8 @@
  * @author  Carl Seifert <carl.seifert@tu-dresden.de>
  */
 
-#include <stdint.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include "net/unicoap/message.h"
 

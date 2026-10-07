@@ -11,8 +11,8 @@
  * @author  Carl Seifert <carl.seifert@tu-dresden.de>
  */
 
-#include <string.h>
 #include <errno.h>
+#include <string.h>
 
 #include "mutex.h"
 
@@ -24,17 +24,19 @@
 #include "debug.h"
 #include "private.h"
 
-static void _on_response_timeout(unicoap_scheduled_event_t* timeout) {
+static void _on_response_timeout(unicoap_scheduled_event_t* timeout)
+{
     unicoap_client_callback_failure(unicoap_client_memo_of_timeout(timeout), -ETIMEDOUT);
     unicoap_client_memo_free(unicoap_client_memo_of_timeout(timeout), -ETIMEDOUT);
 }
 
 int unicoap_client_callback_success(unicoap_client_memo_t* memo, const unicoap_packet_t* packet,
-                            unicoap_block_option_t block) {
+                                    unicoap_block_option_t block)
+{
     (void)block;
     _CLIENT_DEBUG("invoking callback with " UNICOAP_CODE_CLASS_DETAIL_FORMAT " response\n",
-                 unicoap_code_class(packet->message->code),
-                 unicoap_code_detail(packet->message->code));
+                  unicoap_code_class(packet->message->code),
+                  unicoap_code_detail(packet->message->code));
 
     unicoap_callback_t callback = memo->callback;
     void* arg = memo->callback_arg;
@@ -50,7 +52,8 @@ int unicoap_client_callback_success(unicoap_client_memo_t* memo, const unicoap_p
     return 0;
 }
 
-void unicoap_client_callback_failure(unicoap_client_memo_t* memo, int error) {
+void unicoap_client_callback_failure(unicoap_client_memo_t* memo, int error)
+{
     assert(error < 0);
     _CLIENT_DEBUG("invoking callback with error: %i (%s)\n", error, strerror(-error));
     unicoap_callback_t callback = memo->callback;
@@ -63,7 +66,8 @@ void unicoap_client_callback_failure(unicoap_client_memo_t* memo, int error) {
 
 /* TODO: Block-wise processing */
 
-int unicoap_client_process_response(unicoap_packet_t* packet, unicoap_client_memo_t* memo) {
+int unicoap_client_process_response(unicoap_packet_t* packet, unicoap_client_memo_t* memo)
+{
     int res = 0;
 
     /* TODO: Block-wise */
@@ -74,7 +78,8 @@ int unicoap_client_process_response(unicoap_packet_t* packet, unicoap_client_mem
 }
 
 int unicoap_client_send_request_part(unicoap_packet_t* packet, unicoap_client_memo_t* memo,
-                                     unicoap_request_flags_t request_flags) {
+                                     unicoap_request_flags_t request_flags)
+{
     int res = 0;
 
     if (memo) {
@@ -132,7 +137,8 @@ int unicoap_client_send_request_body(unicoap_message_t* request,
 
         unicoap_event_schedule(&memo->super.exchange.timeout, _on_response_timeout,
                                (parameters && parameters->timeout_ms > 0) ?
-                               parameters->timeout_ms : CONFIG_UNICOAP_TIMEOUT_CLIENT_RESPONSE_MS,
+                                   parameters->timeout_ms :
+                                   CONFIG_UNICOAP_TIMEOUT_CLIENT_RESPONSE_MS,
                                "client.resp-timeout");
     }
     /* TODO: OSCORE */
@@ -149,7 +155,8 @@ error:
     return res;
 }
 
-int unicoap_cancel_request(int refno) {
+int unicoap_cancel_request(int refno)
+{
     if (IS_USED(MODULE_UNICOAP_CLIENT_CANCELLATION)) {
         if (refno <= 0) {
             return -EINVAL;
@@ -163,7 +170,8 @@ int unicoap_cancel_request(int refno) {
         unicoap_client_callback_failure(memo, -ECANCELED);
         unicoap_client_memo_free(memo, 0);
         return 0;
-    } else {
+    }
+    else {
         if (IS_ACTIVE(CONFIG_UNICOAP_ASSIST)) {
             unicoap_assist(API_MISUSE("request cancellation not supported")
                                FIXIT("enable unicoap_client_cancellation"));
@@ -198,8 +206,7 @@ static int _open_request(unicoap_message_t* request,
 
             uri_parser_result_t parsed = { 0 };
             if ((res = uri_parser_process(
-                &parsed, destination->remote.uri, destination->_string_length
-            )) < 0) {
+                     &parsed, destination->remote.uri, destination->_string_length)) < 0) {
                 _URI_DEBUG("URI malformed: %i (%s)\n", res, strerror(-res));
                 return res;
             }
@@ -213,31 +220,26 @@ static int _open_request(unicoap_message_t* request,
             }
 
             uint16_t* netif_id = unicoap_endpoint_get_netif_id(&endpoint);
-            if (endpoint.proto == UNICOAP_PROTO_DTLS
-                && IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
-                && IS_ACTIVE(SOCK_HAS_IPV6)
-                && netif_id
-                && *netif_id == 0
-                && sock_udp_ep_is_v6(unicoap_endpoint_get_dtls(&endpoint))
-                && ipv6_addr_is_link_local(unicoap_endpoint_get_ipv6_addr(&endpoint))
-            ) {
+            if (endpoint.proto == UNICOAP_PROTO_DTLS && IS_USED(MODULE_UNICOAP_DRIVER_DTLS) && IS_ACTIVE(SOCK_HAS_IPV6) && netif_id && *netif_id == 0 && sock_udp_ep_is_v6(unicoap_endpoint_get_dtls(&endpoint)) && ipv6_addr_is_link_local(unicoap_endpoint_get_ipv6_addr(&endpoint))) {
                 _CLIENT_DEBUG("warning: v6 link-local with netif id unset, "
                               "tinydtls handshake will fail\n");
                 netif_t* iface = netif_iter(NULL);
                 if (netif_iter(iface)) {
                     _CLIENT_DEBUG("warning: more than 1 netif, refusing to infer netif for dtls\n");
-                } else {
+                }
+                else {
                     *netif_id = netif_get_id(iface);
-                    _CLIENT_DEBUG("warning: missing netif id, assuming single netif %"PRIu16"\n",
-                        *netif_id);
+                    _CLIENT_DEBUG("warning: missing netif id, assuming single netif %" PRIu16 "\n",
+                                  *netif_id);
                 }
             }
 
             return unicoap_client_send_request_body(request, &endpoint, callback,
                                                     parameters, flags);
-        } else {
+        }
+        else {
             unicoap_assist(API_ERROR("URI passed, but module is missing")
-                           FIXIT("add USEMODULE += unicoap_client_uri"));
+                               FIXIT("add USEMODULE += unicoap_client_uri"));
             assert(false);
             return -ENOTSUP;
         }
@@ -248,7 +250,7 @@ static int _open_request(unicoap_message_t* request,
         return -ENOTSUP;
 #else  /* IS_USED(MODULE_DNS) */
         unicoap_assist(API_ERROR("cannot resolve FQDN, dns module missing")
-                       FIXIT("add USEMODULE += dns"));
+                           FIXIT("add USEMODULE += dns"));
         return -ENOTSUP;
 #endif /* IS_USED(MODULE_DNS) */
     }
@@ -272,9 +274,9 @@ typedef struct {
 } _sync_copy_args_t;
 
 static int _copy_callback(const unicoap_message_t* response, const unicoap_aux_t* aux, int error,
-                          void* _arg
-) {
-    _sync_copy_args_t *args = _arg;
+                          void* _arg)
+{
+    _sync_copy_args_t* args = _arg;
     if (error) {
         goto out;
     }
@@ -296,7 +298,7 @@ static int _copy_callback(const unicoap_message_t* response, const unicoap_aux_t
 
         if (unicoap_options_size(response->options) > response->options->storage_capacity) {
             _CLIENT_DEBUG("not enough buffer space to copy options, " _UNICOAP_NEED_HAVE "\n",
-                     unicoap_options_size(response->options), dest_options->storage_capacity);
+                          unicoap_options_size(response->options), dest_options->storage_capacity);
             error = -ENOBUFS;
             goto out;
         }
@@ -365,7 +367,7 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
         return -1;
     }
 
-    _sync_copy_args_t args = (_sync_copy_args_t) {
+    _sync_copy_args_t args = (_sync_copy_args_t){
         .response = response,
         .aux = aux,
         .roadblock = MUTEX_INIT_LOCKED
@@ -378,7 +380,7 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
     _parameters.callback_arg = &args;
 
     int res = unicoap_send_request_async(request, destination,
-        _copy_callback, &_parameters, flags);
+                                         _copy_callback, &_parameters, flags);
     if (res < 0) {
         return res;
     }
@@ -390,13 +392,13 @@ int unicoap_send_request_sync_copy(unicoap_message_t* request,
 
 typedef struct {
     unicoap_response_callback_t callback;
-    void *callback_arg;
+    void* callback_arg;
     int res;
     mutex_t roadblock;
 } _sync_args_t;
 
-static int _sync_callback(const unicoap_message_t *response, const unicoap_aux_t *aux, int error,
-                          void *args)
+static int _sync_callback(const unicoap_message_t* response, const unicoap_aux_t* aux, int error,
+                          void* args)
 {
     _sync_args_t* a = (_sync_args_t*)args;
     a->res = a->callback(response, aux, error, a->callback_arg);
@@ -441,7 +443,7 @@ int unicoap_send_request_sync(unicoap_message_t* request,
     _parameters.callback_arg = &args;
 
     int res = unicoap_send_request_async(request, destination,
-        _sync_callback, &_parameters, flags);
+                                         _sync_callback, &_parameters, flags);
     if (res < 0) {
         return res;
     }
@@ -456,17 +458,17 @@ typedef struct {
     unicoap_message_t* request;
     unicoap_destination_t* destination;
     unicoap_response_callback_t callback;
-    unicoap_request_parameters_t *parameters;
+    unicoap_request_parameters_t* parameters;
     unicoap_request_flags_t flags;
     int res;
     mutex_t roadblock;
 } _async_args_t;
 
-static void _async_callback(unicoap_job_t *job)
+static void _async_callback(unicoap_job_t* job)
 {
     _async_args_t* a = container_of(job, _async_args_t, job);
     a->res = _open_request(a->request, a->destination,
-        (unicoap_callback_t) { .response = a->callback }, a->parameters, a->flags);
+                           (unicoap_callback_t){ .response = a->callback }, a->parameters, a->flags);
     mutex_unlock(&a->roadblock);
 }
 
@@ -474,11 +476,12 @@ int unicoap_send_request_async(unicoap_message_t* request,
                                unicoap_destination_t* destination,
                                unicoap_response_callback_t callback,
                                unicoap_request_parameters_t* parameters,
-                               unicoap_request_flags_t flags) {
+                               unicoap_request_flags_t flags)
+{
     /* Perform direct request sending only from unicoap thread */
     if (thread_getpid() == _unicoap_pid) {
         return _open_request(request, destination,
-            (unicoap_callback_t) { .response = callback }, parameters, flags);
+                             (unicoap_callback_t){ .response = callback }, parameters, flags);
     }
 
     _async_args_t args = {

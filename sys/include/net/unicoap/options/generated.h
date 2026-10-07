@@ -819,7 +819,7 @@ static inline ssize_t unicoap_options_get_next_location_path_component(
  * @retval `-ENOBUFS` @p path lacks sufficient capacity to copy values
  * * @pre @p capacity must be greater than zero
  *
- * This function creates a string from all `Location-Path` options by joining them with the `/` separator. 
+ * This function creates a string from all `Location-Path` options by joining them with the `/` separator.
  * The string will bear the `/` prefix even if there is no `Location-Path` option.
  * The string will not be null-terminated. The resulting string uses UTF-8 encoding.
  */
@@ -1274,7 +1274,7 @@ static inline ssize_t unicoap_options_get_first_uri_query_by_name_string(
  * @returns Length of string value in bytes on success, negative error number otherwise
  * @retval `-EBADOPT` Option corrupted
  * @retval `-ENOBUFS` @p queries lacks sufficient capacity to copy values
- * 
+ *
  * This function creates a string from all `Uri-Query` options by joining them with the `&` separator.
  * The string will not be null-terminated. The resulting string uses UTF-8 encoding.
  */
@@ -1554,7 +1554,7 @@ static inline ssize_t unicoap_options_get_first_location_query_by_name_string(
  * @returns Length of string value in bytes on success, negative error number otherwise
  * @retval `-EBADOPT` Option corrupted
  * @retval `-ENOBUFS` @p queries lacks sufficient capacity to copy values
- * 
+ *
  * This function creates a string from all `Location-Query` options by joining them with the `&` separator.
  * The string will not be null-terminated. The resulting string uses UTF-8 encoding.
  */

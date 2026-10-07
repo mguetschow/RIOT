@@ -13,10 +13,9 @@
 
 #include <string.h>
 
-#include "thread.h"
 #include "compiler_hints.h"
-
 #include "net/unicoap/server.h"
+#include "thread.h"
 
 #define ENABLE_DEBUG CONFIG_UNICOAP_DEBUG_LOGGING
 #include "debug.h"
@@ -134,15 +133,15 @@ int unicoap_server_process_request(unicoap_packet_t* packet, const unicoap_resou
 
     if (res > 0) {
         _SERVER_DEBUG("sending response " UNICOAP_CODE_CLASS_DETAIL_FORMAT
-                     " from return value\n",
-                     unicoap_code_class((uint8_t)res), unicoap_code_detail((uint8_t)res));
+                      " from return value\n",
+                      unicoap_code_class((uint8_t)res), unicoap_code_detail((uint8_t)res));
 
         if (IS_ACTIVE(CONFIG_UNICOAP_PREVENT_OPTIONAL_RESPONSES)) {
             if (unicoap_response_is_optional(packet->message->options, (unicoap_status_t)res)) {
                 _SERVER_DEBUG("response " UNICOAP_CODE_CLASS_DETAIL_FORMAT
-                             " is optional, not responding\n",
-                             unicoap_code_class((uint8_t)res),
-                             unicoap_code_detail((uint8_t)res));
+                              " is optional, not responding\n",
+                              unicoap_code_class((uint8_t)res),
+                              unicoap_code_detail((uint8_t)res));
                 return 0;
             }
         }
@@ -160,9 +159,9 @@ int unicoap_server_process_request(unicoap_packet_t* packet, const unicoap_resou
             if (res >= 0) {
                 /* Handler did not fail but did not send response. */
                 unicoap_assist(API_MISUSE("handler did not respond")
-                               FIXIT("set USEMODULE += unicoap_deferred_response and"
-                                     "call unicoap_defer_response")
-                               FIXIT("ignore request by returning UNICOAP_IGNORING_REQUEST"));
+                                   FIXIT("set USEMODULE += unicoap_deferred_response and"
+                                         "call unicoap_defer_response")
+                                       FIXIT("ignore request by returning UNICOAP_IGNORING_REQUEST"));
             }
             unicoap_response_init_string(packet->message,
                                          UNICOAP_STATUS_INTERNAL_SERVER_ERROR, "application");

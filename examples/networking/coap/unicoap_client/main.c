@@ -81,8 +81,8 @@ static int _on_response(
     unicoap_content_format_t format;
     if ((error = unicoap_options_get_content_format(response->options, &format)) >= 0
         && unicoap_content_format_is_human_readable(format)) {
-        printf("text response: '%.*s'\n", 
-            (int)unicoap_message_payload_get_size(response), 
+        printf("text response: '%.*s'\n",
+            (int)unicoap_message_payload_get_size(response),
             (char*)unicoap_message_payload_get((unicoap_message_t*)response));
     }
     else if (IS_USED(MODULE_OD)
@@ -90,8 +90,8 @@ static int _on_response(
             && unicoap_message_payload_get_size(response) > 0
     ) {
         od_hex_dump(
-                unicoap_message_payload_get((unicoap_message_t*)response), 
-                unicoap_message_payload_get_size(response), 
+                unicoap_message_payload_get((unicoap_message_t*)response),
+                unicoap_message_payload_get_size(response),
                 16);
     }
     return 0;

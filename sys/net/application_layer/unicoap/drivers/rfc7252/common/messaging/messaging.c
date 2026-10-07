@@ -11,12 +11,13 @@
  * @author  Carl Seifert <carl.seifert@tu-dresden.de>
  */
 
-#include <stdint.h>
 #include <errno.h>
 #include <stdatomic.h>
+#include <stdint.h>
+
+#include "container.h"
 #include "random.h"
 #include "ztimer.h"
-#include "container.h"
 
 #define ENABLE_DEBUG CONFIG_UNICOAP_DEBUG_LOGGING
 #include "debug.h"
@@ -26,28 +27,30 @@
 #define PDU_7252_DEBUG(...)       _UNICOAP_PREFIX_DEBUG(".pdu.rfc7252", __VA_ARGS__)
 
 /** @brief Message ID print format */
-#define UNICOAP_MESSAGE_ID_FORMAT  "[MID %" PRIu16 "] "
+#define UNICOAP_MESSAGE_ID_FORMAT "[MID %" PRIu16 "] "
 
-#define PACKET_7252_DEBUG(packet)                                                                \
-    DEBUG("<%s %s mid=%" PRIu16 " token=",                                                       \
-        unicoap_string_from_rfc7252_type(_get_type(packet)),                                     \
-        unicoap_string_from_code_class((packet)->message->code),                                 \
-        _get_id(packet)                                                                          \
-    );                                                                                           \
-                                                                                                 \
-    _UNICOAP_DEBUG_HEX((packet)->properties.token, (packet)->properties.token_length);           \
-                                                                                                 \
-    DEBUG(" code=" UNICOAP_CODE_CLASS_DETAIL_FORMAT " %s payload=(%" PRIuSIZE " bytes) "         \
-          "options=(%" PRIuSIZE "; %" PRIuSIZE " bytes)>",                                       \
-          unicoap_code_class((packet)->message->code),                                           \
-          unicoap_code_detail((packet)->message->code),                                          \
-          unicoap_string_from_code((packet)->message->code),                                     \
-          (packet)->message->payload_size,                                                       \
-          (packet)->message->options ? (packet)->message->options->option_count : 0,             \
-          (packet)->message->options ? (packet)->message->options->storage_size : 0              \
-    )
+#define PACKET_7252_DEBUG(packet)                                                        \
+    DEBUG("<%s %s mid=%" PRIu16 " token=",                                               \
+          unicoap_string_from_rfc7252_type(_get_type(packet)),                           \
+          unicoap_string_from_code_class((packet)->message->code),                       \
+          _get_id(packet));                                                              \
+                                                                                         \
+    _UNICOAP_DEBUG_HEX((packet)->properties.token, (packet)->properties.token_length);   \
+                                                                                         \
+    DEBUG(" code=" UNICOAP_CODE_CLASS_DETAIL_FORMAT " %s payload=(%" PRIuSIZE " bytes) " \
+          "options=(%" PRIuSIZE "; %" PRIuSIZE " bytes)>",                               \
+          unicoap_code_class((packet)->message->code),                                   \
+          unicoap_code_detail((packet)->message->code),                                  \
+          unicoap_string_from_code((packet)->message->code),                             \
+          (packet)->message->payload_size,                                               \
+          (packet)->message->options ? (packet)->message->options->option_count : 0,     \
+          (packet)->message->options ? (packet)->message->options->storage_size : 0)
 
-#define __IOLIST(data, size, next) (iolist_t){ .iol_base = data, .iol_len = size, .iol_next = next }
+#define __IOLIST(data, size, next)                          \
+    (iolist_t)                                              \
+    {                                                       \
+        .iol_base = data, .iol_len = size, .iol_next = next \
+    }
 
 typedef struct {
     /**
@@ -167,7 +170,8 @@ static inline void _set_type(unicoap_packet_t* packet, unicoap_rfc7252_message_t
     packet->properties.rfc7252.type = type;
 }
 
-static inline const unicoap_endpoint_t* _transmission_get_endpoint(const _transmission_t* transmission) {
+static inline const unicoap_endpoint_t* _transmission_get_endpoint(const _transmission_t* transmission)
+{
     return &transmission->endpoint;
 }
 
@@ -241,7 +245,7 @@ static inline _transmission_t* _transmission_alloc_unsafe(void)
 }
 
 static _transmission_t* _transmission_create(const unicoap_endpoint_t* endpoint,
-                                            unicoap_packet_t* packet)
+                                             unicoap_packet_t* packet)
 {
     assert(packet);
 
@@ -291,8 +295,7 @@ static _transmission_t* _transmission_find(const unicoap_endpoint_t* endpoint, u
         _transmission_t* transmission = &_state.transmissions[i];
         if (transmission->is_used &&
             transmission->id == id &&
-            unicoap_endpoint_is_equal(&transmission->endpoint, endpoint)
-        ) {
+            unicoap_endpoint_is_equal(&transmission->endpoint, endpoint)) {
             return transmission;
         }
     }
@@ -320,8 +323,8 @@ static inline void _transmission_free(_transmission_t* transmission, bool discon
 static inline void _transmission_free_notif(
     _transmission_t* transmission,
     unicoap_layer_notification_t type,
-    bool disconnect
-) {
+    bool disconnect)
+{
     void* exchange = transmission->exchange;
     _transmission_free(transmission, disconnect);
     if (exchange) {
@@ -329,10 +332,10 @@ static inline void _transmission_free_notif(
     }
 }
 
-void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t type, void* arg) {
+void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t type, void* arg)
+{
     _transmission_t* transmission = (_transmission_t*)state;
-    if ((type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE)
-        || (type == UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE)) {
+    if ((type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE) || (type == UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE)) {
         MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT "exchange layer released state (type %i)\n",
                              transmission->id, type);
         transmission->exchange = NULL;
@@ -342,8 +345,9 @@ void unicoap_messaging_notify_rfc7252(void* state, unicoap_layer_notification_t 
          * thereby cancel any retransmissions of the request because we release state here once
          * the exchange layer does. */
         _transmission_free_notif(transmission, UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE,
-            type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE);
-    } else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC) {
+                                 type & UNICOAP_LAYER_NOTIFICATION_ASYNC_FAILURE);
+    }
+    else if (type == UNICOAP_LAYER_NOTIFICATION_STATE_ALLOC) {
         MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT "exchange layer alloc'd state (type %i)\n",
                              transmission->id, type);
         transmission->exchange = arg;
@@ -362,7 +366,7 @@ static int _sendv(iolist_t* list, const unicoap_endpoint_t* remote, const unicoa
     switch (remote->proto) {
 #if IS_USED(MODULE_UNICOAP_DRIVER_UDP)
     case UNICOAP_PROTO_UDP: {
-        extern int unicoap_transport_sendv_udp(iolist_t* iolist, const sock_udp_ep_t* remote,
+        extern int unicoap_transport_sendv_udp(iolist_t * iolist, const sock_udp_ep_t* remote,
                                                const sock_udp_ep_t* local);
         return unicoap_transport_sendv_udp(
             list, unicoap_endpoint_get_udp((unicoap_endpoint_t*)remote),
@@ -372,7 +376,7 @@ static int _sendv(iolist_t* list, const unicoap_endpoint_t* remote, const unicoa
 
 #if IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
     case UNICOAP_PROTO_DTLS: {
-        extern int unicoap_transport_sendv_dtls(iolist_t* iolist, const sock_udp_ep_t* remote,
+        extern int unicoap_transport_sendv_dtls(iolist_t * iolist, const sock_udp_ep_t* remote,
                                                 const sock_udp_ep_t* local,
                                                 unicoap_sock_dtls_session_t* session);
         return unicoap_transport_sendv_dtls(
@@ -390,7 +394,7 @@ static int _sendv(iolist_t* list, const unicoap_endpoint_t* remote, const unicoa
     }
 #endif
 
-/* MARK: unicoap_driver_extension_point */
+        /* MARK: unicoap_driver_extension_point */
 
     default:
         MESSAGING_7252_DEBUG("unsupported protocol number\n");
@@ -399,9 +403,10 @@ static int _sendv(iolist_t* list, const unicoap_endpoint_t* remote, const unicoa
     }
 }
 
-static int _disconnect(_transmission_t* transmission) {
+static int _disconnect(_transmission_t* transmission)
+{
     if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS)) {
-        extern int unicoap_transport_disconnect_dtls(sock_dtls_session_t* session);
+        extern int unicoap_transport_disconnect_dtls(sock_dtls_session_t * session);
         unicoap_sock_dtls_session_t* session = _transmission_get_session(transmission);
         if (session) {
             return unicoap_transport_disconnect_dtls(session);
@@ -410,7 +415,8 @@ static int _disconnect(_transmission_t* transmission) {
     return 0;
 }
 
-static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
+static int _connect(unicoap_packet_t* packet, _transmission_t** transmission)
+{
     if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS) && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
         int res = 0;
         /* Sending now might block for this transport, in which case we will
@@ -426,9 +432,8 @@ static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
             return -ENOBUFS;
         }
         if ((res = unicoap_transport_connect_dtls(
-            unicoap_endpoint_get_dtls((unicoap_endpoint_t*)packet->remote),
-            _transmission_get_session(*transmission)
-        )) < 0) {
+                 unicoap_endpoint_get_dtls((unicoap_endpoint_t*)packet->remote),
+                 _transmission_get_session(*transmission))) < 0) {
             if (res == -EEXIST) {
                 /* Session exists, do not delay transmission, allow caller to transmit immediately. */
                 (*transmission)->delayed = false;
@@ -443,7 +448,8 @@ static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
         (*transmission)->delayed = true;
         /* Session does not already exist, so we have to delay it. */
         MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT
-                                "delaying until connected\n", _get_id(packet));
+                             "delaying until connected\n",
+                             _get_id(packet));
         if (!(*transmission)->pdu) {
             uint8_t* carbon_copy = NULL;
             if (!(carbon_copy = _carbon_copy_alloc())) {
@@ -457,8 +463,8 @@ static int _connect(unicoap_packet_t* packet, _transmission_t** transmission) {
 
 static ssize_t _build_and_send_pdu(
     unicoap_packet_t* packet,
-    _transmission_t** transmission
-) {
+    _transmission_t** transmission)
+{
     assert(packet);
     assert(packet->message);
     assert(packet->remote);
@@ -471,9 +477,7 @@ static ssize_t _build_and_send_pdu(
     iolist_t lists[UNICOAP_PDU_IOLIST_COUNT];
     ssize_t size = 0;
 
-    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
-        && transmission
-        && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
+    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS) && transmission && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
         if ((res = _connect(packet, transmission)) < 0) {
             return res;
         }
@@ -500,16 +504,15 @@ static ssize_t _build_and_send_pdu(
         lists[0].iol_base = carbon_copy;
         lists[0].iol_len = size;
         lists[0].iol_next = NULL;
-    } else {
+    }
+    else {
         if ((size = unicoap_pdu_buildv_rfc7252(header, sizeof(header), packet->message,
                                                &packet->properties, lists)) < 0) {
             return size;
         }
     }
 
-    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
-        && transmission
-        && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
+    if (IS_USED(MODULE_UNICOAP_DRIVER_DTLS) && transmission && unicoap_packet_proto(packet) == UNICOAP_PROTO_DTLS) {
         if (*transmission && (*transmission)->delayed) {
             /* DTLS session has not been established yet. Do not send immediately. Do not block. */
             return size;
@@ -530,7 +533,6 @@ static inline void _handle_ack(const unicoap_endpoint_t* remote, uint16_t id)
     if (transmission) {
         DEBUG("stopping retransmission\n");
         _transmission_free_notif(transmission, UNICOAP_LAYER_NOTIFICATION_STATE_RELEASE, false);
-
     }
     else {
         DEBUG("no message with ID, ignoring\n");
@@ -546,7 +548,7 @@ static void _handle_reset(const unicoap_endpoint_t* remote, uint16_t id)
     if (transmission) {
         DEBUG("\n");
         _transmission_free_notif(transmission,
-            unicoap_layer_notification_async_failure_from_errno(ECONNRESET), false);
+                                 unicoap_layer_notification_async_failure_from_errno(ECONNRESET), false);
     }
     else {
         DEBUG(", no message with ID, ignoring\n");
@@ -555,7 +557,8 @@ static void _handle_reset(const unicoap_endpoint_t* remote, uint16_t id)
 
 static void _on_ack_timeout(unicoap_scheduled_event_t* _event);
 
-static int _send_carbon_copy(_transmission_t* transmission) {
+static int _send_carbon_copy(_transmission_t* transmission)
+{
     int res = 0;
     uint32_t duration = 0;
     MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT "transmitting carbon copy\n", transmission->id);
@@ -581,8 +584,8 @@ static int _send_carbon_copy(_transmission_t* transmission) {
 
     iolist_t list = __IOLIST(transmission->pdu, transmission->pdu_size, NULL);
     if ((res = _sendv(&list,
-                     _transmission_get_endpoint(transmission), NULL,
-                     _transmission_get_session(transmission))) < 0) {
+                      _transmission_get_endpoint(transmission), NULL,
+                      _transmission_get_session(transmission))) < 0) {
         return res;
     }
 
@@ -594,7 +597,8 @@ static int _send_carbon_copy(_transmission_t* transmission) {
     return res;
 }
 
-static void _on_ack_timeout(unicoap_scheduled_event_t* _event) {
+static void _on_ack_timeout(unicoap_scheduled_event_t* _event)
+{
     _transmission_t* transmission = container_of(_event, _transmission_t, ack_timeout);
     assert(transmission);
     assert(transmission->pdu);
@@ -603,7 +607,8 @@ static void _on_ack_timeout(unicoap_scheduled_event_t* _event) {
 
     if (transmission->remaining_retransmissions == 0) {
         MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT
-                             "ACK timeout, max retransmissions exceeded\n", transmission->id);
+                             "ACK timeout, max retransmissions exceeded\n",
+                             transmission->id);
         res = -ETIMEDOUT;
         goto error;
     }
@@ -670,14 +675,14 @@ static inline int _reset(unicoap_packet_t* packet)
     return _send_empty_message(packet);
 }
 
-static int _resume(const unicoap_endpoint_t* endpoint, unicoap_sock_dtls_session_t* session) {
+static int _resume(const unicoap_endpoint_t* endpoint, unicoap_sock_dtls_session_t* session)
+{
     (void)endpoint;
 #if CONFIG_UNICOAP_RFC7252_TRANSMISSIONS_MAX > 0
     for (int i = 0; i < (int)ARRAY_SIZE(_state.transmissions); i += 1) {
         _transmission_t* transmission = &_state.transmissions[i];
         if (transmission->is_used &&
-            unicoap_endpoint_is_equal(&transmission->endpoint, endpoint)
-        ) {
+            unicoap_endpoint_is_equal(&transmission->endpoint, endpoint)) {
             _transmission_set_session(transmission, session);
             _send_carbon_copy(transmission);
         }
@@ -726,13 +731,11 @@ static int _process_messaging_layer(unicoap_packet_t* packet)
         else if (!unicoap_message_code_is_response(message->code)) {
             MESSAGING_7252_DEBUG(
                 UNICOAP_MESSAGE_ID_FORMAT
-                "received ACK, expected code 0.00 or response code, got "
-                UNICOAP_CODE_CLASS_DETAIL_FORMAT
+                "received ACK, expected code 0.00 or response code, got " UNICOAP_CODE_CLASS_DETAIL_FORMAT
                 ", ignoring\n",
                 _get_id(packet),
                 unicoap_code_class(message->code),
-                unicoap_code_detail(message->code)
-            );
+                unicoap_code_detail(message->code));
             return -EPROTO;
         }
         break;
@@ -742,13 +745,11 @@ static int _process_messaging_layer(unicoap_packet_t* packet)
         if (message->code != UNICOAP_CODE_EMPTY) {
             MESSAGING_7252_DEBUG(
                 UNICOAP_MESSAGE_ID_FORMAT
-                "received RST, expected 0.00, got "
-                UNICOAP_CODE_CLASS_DETAIL_FORMAT
+                "received RST, expected 0.00, got " UNICOAP_CODE_CLASS_DETAIL_FORMAT
                 ", ignoring\n",
                 _get_id(packet),
                 unicoap_code_class(message->code),
-                unicoap_code_detail(message->code)
-            );
+                unicoap_code_detail(message->code));
             return -EPROTO;
         }
 
@@ -819,7 +820,7 @@ int unicoap_messaging_process_rfc7252(const uint8_t* pdu, size_t size, unicoap_m
     unicoap_messaging_flags_t flags;
 
     switch ((res = unicoap_exchange_preprocess(packet, &flags, &arg,
-        event & UNICOAP_MESSAGING_RFC7252_EVENT_TRUNCATED))) {
+                                               event & UNICOAP_MESSAGING_RFC7252_EVENT_TRUNCATED))) {
     case UNICOAP_PREPROCESSING_SUCCESS_REQUEST:
         break;
 
@@ -829,7 +830,8 @@ int unicoap_messaging_process_rfc7252(const uint8_t* pdu, size_t size, unicoap_m
         /* Releasing the transmission when receiving an ACK is done in _process_messaging_layer. */
         if (_get_type(packet) == UNICOAP_TYPE_CON) {
             MESSAGING_7252_DEBUG(UNICOAP_MESSAGE_ID_FORMAT
-                                 "sending empty ACK for expected response\n", _get_id(packet));
+                                 "sending empty ACK for expected response\n",
+                                 _get_id(packet));
 
             /* We're going to need the response below, don't override it. */
             unicoap_message_t* message = packet->message;
@@ -1014,9 +1016,8 @@ error:
     if (transmission) {
         assert(transmission->exchange == NULL);
         _transmission_free_notif(transmission,
-            unicoap_layer_notification_async_failure_from_errno(-res),
-            true
-        );
+                                 unicoap_layer_notification_async_failure_from_errno(-res),
+                                 true);
     }
     return res;
 }
@@ -1042,7 +1043,7 @@ void unicoap_messaging_print_rfc7252_state(void)
         printf("\t\t\t- pdu_size=%" PRIuSIZE "\n", transmission->pdu_size);
         printf("\t\t\t- exchange=%p\n", transmission->exchange);
     }
-#endif /* CONFIG_UNICOAP_RFC7252_TRANSMISSIONS_MAX > 0 */
+#  endif /* CONFIG_UNICOAP_RFC7252_TRANSMISSIONS_MAX > 0 */
 
     printf("\n\t- RFC 7252 carbon copies (%" PRIuSIZE " total):\n",
            (size_t)CONFIG_UNICOAP_CARBON_COPIES_MAX);
@@ -1053,5 +1054,5 @@ void unicoap_messaging_print_rfc7252_state(void)
                (size_t)CONFIG_UNICOAP_PDU_SIZE_MAX, *_state.carbon_copies[i] != 0);
     }
 #  endif /* CONFIG_UNICOAP_CARBON_COPIES_MAX > 0 */
-#endif /* ENABLE_DEBUG */
+#endif   /* ENABLE_DEBUG */
 }
