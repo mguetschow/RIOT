@@ -395,6 +395,11 @@ static inline int _init_drivers(event_queue_t* queue)
         return -1;
     }
 #endif
+#if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
+    if (unicoap_init_gatt(queue) < 0) {
+        return -1;
+    }
+#endif
     /* MARK: unicoap_driver_extension_point */
     return 0;
 }
@@ -414,6 +419,9 @@ static inline int _deinit_drivers(event_queue_t* queue)
 #endif
 #if IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX)
     res += unicoap_deinit_slipmux(queue);
+#endif
+#if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
+    res += unicoap_deinit_gatt(queue);
 #endif
     /* MARK: unicoap_driver_extension_point */
     return res;
@@ -587,6 +595,11 @@ int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t f
     case UNICOAP_PROTO_SLIPMUX:
         return unicoap_messaging_send_rfc7252(packet, flags, exchange);
 #endif
+#if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
+    case UNICOAP_PROTO_GATT: {
+        return unicoap_messaging_send_gatt(packet, flags, exchange);
+    }
+#endif
     /* MARK: unicoap_driver_extension_point */
     default:
         _MESSAGING_DEBUG("missing driver for proto %s\n",
@@ -688,8 +701,7 @@ unicoap_preprocessing_result_t unicoap_exchange_preprocess(unicoap_packet_t* pac
     }
 }
 
-int unicoap_exchange_process(unicoap_packet_t* packet, unicoap_exchange_arg_t arg)
-{
+int unicoap_exchange_process(unicoap_packet_t* packet, unicoap_exchange_arg_t arg) { // todo: change to pointer??
     switch (unicoap_code_class(packet->message->code)) {
     case UNICOAP_CODE_CLASS_REQUEST:
         return IS_USED(MODULE_UNICOAP_SERVER) ?

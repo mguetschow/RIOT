@@ -175,7 +175,7 @@ extern "C" {
  */
 #define AUTO_INIT_PRIO_MOD_UWB_CORE                     1230
 #endif
-#ifndef AUTO_INIT_PRIO_MOD_GCOAP
+#ifndef AUTO_INIT_PRIO_MOD_NANOCOAP
 /**
  * @brief   nanoCoAP server priority
  */
@@ -191,7 +191,7 @@ extern "C" {
 /**
  * @brief   `unicoap` priority
  */
-#define AUTO_INIT_PRIO_MOD_UNICOAP                      1245
+#define AUTO_INIT_PRIO_MOD_UNICOAP                      1445 // todo: rethink this, needs to be after nimble for coap over gatt
 #endif
 #ifndef AUTO_INIT_PRIO_MOD_DEVFS
 /**

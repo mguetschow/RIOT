@@ -1,1 +1,7 @@
 INCLUDES += -I$(RIOTBASE)/sys/net/application_layer/unicoap/include
+
+# todo: see /home/mikolai/.riot/pkg/nimble/porting/npl/riot/include/syscfg/syscfg.h
+# CFLAGS += -DMYNEWT_VAL_MSYS_1_BLOCK_SIZE=88
+CFLAGS += -DMYNEWT_VAL_MSYS_1_BLOCK_COUNT=7
+
+# todo: may set MYNEWT_VAL_BLE_ATT_PREFERRED_MTU from default 256 to higher/lower according to UNICOAP_MAX_PDU_SIZE - 247 is default BLE, up to 527 possible with nimble

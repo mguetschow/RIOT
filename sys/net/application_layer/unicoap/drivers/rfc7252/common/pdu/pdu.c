@@ -198,6 +198,8 @@ ssize_t unicoap_pdu_build_header_rfc7252(uint8_t* header, size_t capacity,
 {
     assert(properties->token_length <= 0xf);
     if (capacity < sizeof(unicoap_header_rfc7252_t) + properties->token_length) {
+        PDU_7252_DEBUG("not enough buffer space to build header " _UNICOAP_NEED_HAVE "\n",
+            sizeof(unicoap_header_rfc7252_t) + properties->token_length, capacity);
         return -ENOBUFS;
     }
 

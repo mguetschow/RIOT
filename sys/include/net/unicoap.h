@@ -91,7 +91,7 @@ typedef struct {
  * @param func A function that must be of type `void (unicoap_job_t* job)`.
  * @returns Designated initializer for @ref unicoap_job_t
  */
-#define UNICOAP_JOB(func) { \
+#define UNICOAP_JOB(func) (unicoap_job_t){ \
     .super = { \
         .handler = _UNICOAP_TRY_TYPECHECK_JOB_FUNC(func) \
     } \

@@ -147,7 +147,10 @@ typedef enum {
     UNICOAP_PROTO_DTLS = 2 << 1,
 
     /** @brief CoAP over Slipmux endpoint */
-    UNICOAP_PROTO_SLIPMUX = 3 << 1,
+    UNICOAP_PROTO_SLIPMUX = 3 << 1, // todo: is this reliable?
+
+    /** @brief CoAP over GATT */
+    UNICOAP_PROTO_GATT = (4 << 1),
 
     /* MARK: unicoap_driver_extension_point */
 } __attribute__((__packed__)) unicoap_proto_t;
@@ -189,9 +192,8 @@ static inline bool unicoap_transport_uses_sock_tl_ep(unicoap_proto_t proto)
     case UNICOAP_PROTO_DTLS:
         return true;
     case UNICOAP_PROTO_SLIPMUX:
+    case UNICOAP_PROTO_GATT:
         return false;
-    /* If a new transport driver does not use RIOT's socket API,
-     * such as CoAP over GATT, return false here. */
     /* MARK: unicoap_driver_extension_point */
     default:
         return false;
@@ -222,7 +224,14 @@ typedef struct {
 #endif /* IS_USED(MODULE_UNICOAP_SOCK_SUPPORT) || defined(DOXYGEN) */
 #if IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX) || defined(DOXYGEN)
         slipdev_t *slipmux_ep;
-#endif /* IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX) || defined(DOXYGEN) */
+#endif
+// #if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON) || defined(DOXYGEN)
+        struct {
+            uint8_t peer_addr[6];
+            bool conn_handle_set : 1;
+            uint16_t conn_handle : 15;
+        }; // todo: how to find out if only one of them is set?
+// #endif
         /* MARK: unicoap_driver_extension_point */
     };
 } unicoap_endpoint_t;
@@ -701,6 +710,30 @@ int unicoap_transport_udp_remove_socket(sock_udp_t* socket)
 #  endif
 #endif /* IS_USED(MODULE_UNICOAP_SOCK_SUPPORT) || defined(DOXYGEN) */
 /** @} */
+/** @} */
+
+/**
+ * @addtogroup net_unicoap_drivers_gatt
+ * @{
+ */
+/* MARK: - GATT Events */
+/**
+ * @name GATT Events
+ * @{
+ */
+// todo: doc
+typedef enum {
+    UNICOAP_TRANSPORT_GATT_ROLE_UNSPECIFIED = 0,
+    UNICOAP_TRANSPORT_GATT_ROLE_CENTRAL,
+    UNICOAP_TRANSPORT_GATT_ROLE_PERIPHERAL,
+} unicoap_transport_gatt_role_t;
+typedef enum {
+    UNICOAP_TRANSPORT_GATT_EVENT_CONNECT,
+    UNICOAP_TRANSPORT_GATT_EVENT_DISCONNECT,
+} unicoap_transport_gatt_event_t;
+typedef void (*unicoap_transport_gatt_event_cb)(unicoap_endpoint_t *endpoint, unicoap_transport_gatt_role_t role, unicoap_transport_gatt_event_t event);
+/** @brief Set the GATT event callback to be notified about connection events. */
+void unicoap_transport_gatt_set_event_callback(unicoap_transport_gatt_event_cb callback);
 /** @} */
 
 /**

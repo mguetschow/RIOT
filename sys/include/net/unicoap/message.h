@@ -315,14 +315,30 @@ typedef struct {
      */
     bool is_notification : 1;
 
-    /** @brief RFC 7252 only properties */
-    struct {
-        /** @brief RFC 7252 message type */
-        unicoap_rfc7252_message_type_t type : UNICOAP_RFC7252_MESSAGE_TYPE_FIXED_WIDTH;
+    union {
+        /** @brief RFC 7252 only properties */
+        struct {
+            /** @brief RFC 7252 message type */
+            unicoap_rfc7252_message_type_t type : UNICOAP_RFC7252_MESSAGE_TYPE_FIXED_WIDTH;
 
-        /** @brief RFC 7252 message ID */
-        uint16_t id;
-    } rfc7252;
+            /** @brief RFC 7252 message ID */
+            uint16_t id;
+        } rfc7252;
+
+        /** @brief coap-over-gatt only properties */
+        struct {
+            /** @brief coap-over-gatt message ID */
+            bool id : 1;
+
+            /** @brief coap-over-gatt confirm bit */
+            bool confirm : 1;
+
+            /** @brief coap-over-gatt acknowledge ID */
+            bool acknowledge_id : 1;
+        } gatt;
+
+        /* MARK: unicoap_driver_extension_point */
+    };
 } unicoap_message_properties_t;
 
 /**
@@ -338,6 +354,12 @@ typedef struct {
  * @retval `"?"` Unknown message type
  */
 const char* unicoap_string_from_rfc7252_type(unicoap_rfc7252_message_type_t type);
+
+const char *unicoap_string_from_gatt_con(unicoap_message_properties_t *properties);
+const char *unicoap_string_from_gatt_mid(unicoap_message_properties_t *properties);
+const char *unicoap_string_from_gatt_ack(unicoap_message_properties_t *properties);
+
+/* MARK: unicoap_driver_extension_point */
 
 /**
  * @brief Retrieves options storage buffer
@@ -1312,8 +1334,6 @@ static inline ssize_t unicoap_pdu_build_rfc7252(uint8_t* pdu, size_t capacity,
     return unicoap_pdu_build_options_and_payload(pdu + res, capacity - res, message) + res;
 }
 
-/* MARK: unicoap_driver_extension_point */
-
 /**
  * @brief Populates the given iolist with header according to RFC 7252, options, and payload
  *
@@ -1346,6 +1366,69 @@ static inline ssize_t unicoap_pdu_buildv_rfc7252(uint8_t* header, size_t header_
 
 /** @} */
 /** @} */
+
+/**
+ * @addtogroup net_unicoap_drivers_gatt_pdu
+ * @{
+ */
+/**
+ * @name Parsing
+ * @{
+ */
+/**
+ * @brief Parses GATT PDU
+ *
+ * @param pdu Buffer containing PDU to parse
+ * @param size Size of PDU in bytes
+ * @param[out] message Pre-allocated message to populate, should have options set
+ * @param[out] properties Pre-allocated properties structure to populate
+ *
+ * @pre @p message is allocated
+ * @pre @p properties is allocated
+ *
+ * @returns Zero on success or negative errno on failure
+ * @retval `-EBADOPT` Bad option
+ * @retval `-ENOBUFS` Options buffer in @ref unicoap_message_t::options (@ref unicoap_options_t)
+ *                    too small
+ *
+ * @remark To allocate everything needed in one go, use @ref unicoap_pdu_parse_gatt_result
+ * instead.
+ *
+ * @note This function does not mutate or copy the buffer pointed at by @p pdu. However,
+ * it **does escape** pointers into the buffer pointed at by @p pdu in @p message . This is
+ * necessary to create a lookup array for options, i.e., to avoid re-parsing the options buffer.
+ * You will need to decide whether you treat the message's options as constant or not.
+ * This depends on whether the buffer @p pdu passed to this function is considered constant
+ * _by you_.
+ *
+ * As `unicoap` cannot guarantee you won't add/insert/remove options later, @p pdu is not qualified
+ * by `const`. That hypothetical `const` depends on your usage of the message and its options.
+ */
+ssize_t unicoap_pdu_parse_gatt(uint8_t *pdu, size_t size, unicoap_message_t *message,
+                               unicoap_message_properties_t *properties);
+/** @} */
+
+/**
+ * @name Serializing
+ * @{
+ */
+/**
+ * @brief Writes GATT PDU header in the given buffer
+ *
+ * @param[in,out] header Buffer the header will be written into
+ * @param capacity Number of usable bytes in the @p header buffer
+ * @param[in] message Message to construct header from (use code or payload_size)
+ * @param[in] properties Message properties to serialize into the header
+ *
+ * @returns Header size
+ * @retval `-ENOBUFS` Buffer too small
+ */
+ssize_t unicoap_header_build_gatt(uint8_t *header, size_t capacity,
+                                  const unicoap_message_t *message,
+                                  const unicoap_message_properties_t *properties);
+/** @} */
+/** @} */
+
 /* MARK: unicoap_driver_extension_point */
 
 #ifdef __cplusplus

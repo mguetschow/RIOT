@@ -25,7 +25,6 @@
 #include "private.h"
 
 #define MESSAGING_7252_DEBUG(...) _UNICOAP_PREFIX_DEBUG(".messaging.rfc7252", __VA_ARGS__)
-#define PDU_7252_DEBUG(...)       _UNICOAP_PREFIX_DEBUG(".pdu.rfc7252", __VA_ARGS__)
 
 /** @brief Message ID print format */
 #define UNICOAP_MESSAGE_ID_FORMAT "[MID %" PRIu16 "] "
@@ -785,7 +784,6 @@ int unicoap_messaging_process_rfc7252(const uint8_t* pdu, size_t size, unicoap_m
     int res = 0;
 
     if ((res = unicoap_pdu_parse_rfc7252((uint8_t*)pdu, size, &message, &packet->properties)) < 0) {
-        PDU_7252_DEBUG("parsing error: %i (%s)\n", res, strerror(-res));
         return res;
     }
 

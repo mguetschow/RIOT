@@ -196,6 +196,12 @@ int unicoap_init_rfc7252_common(event_queue_t* queue);
 /** @brief DeiInitializes the common RFC 7252 driver on the given @p queue */
 int unicoap_deinit_rfc7252_common(event_queue_t* queue);
 
+/** @brief Initializes the CoAP over BLE GATT driver on the given @p queue */
+int unicoap_init_gatt(event_queue_t* queue);
+
+/** @brief Deinitializes the CoAP over BLE GATT driver on the given @p queue */
+int unicoap_deinit_gatt(event_queue_t* queue);
+
 /* MARK: unicoap_driver_extension_point */
 /** @} */
 

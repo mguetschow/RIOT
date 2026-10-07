@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "fmt.h"
 #include "net/af.h"
 #include "net/ipv4/addr.h"
 #include "net/ipv6/addr.h"
@@ -83,6 +84,18 @@ void unicoap_print_endpoint(const unicoap_endpoint_t* endpoint)
         return;
     }
 #endif
+#if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
+    if (endpoint->proto == UNICOAP_PROTO_GATT) {
+        printf("<connection_handle=%" PRIu16 ", mac=", endpoint->conn_handle);
+        unsigned i;
+        for (i=0; i<sizeof(endpoint->peer_addr)-1; i++) {
+            printf("%02X:", endpoint->peer_addr[i]);
+        }
+        printf("%02X>", endpoint->peer_addr[i]);
+        return;
+    }
+#endif
+    /* MARK: unicoap_driver_extension_point */
     printf("<endpoint (unprintable) proto=%u>", endpoint->proto);
 }
 
@@ -95,6 +108,8 @@ const char* unicoap_string_from_proto(unicoap_proto_t proto)
         return "DTLS";
     case UNICOAP_PROTO_SLIPMUX:
         return "SLIPMUX";
+    case UNICOAP_PROTO_GATT:
+        return "BLE-GATT";
         /* MARK: unicoap_driver_extension_point */
     default:
         return "?";
@@ -118,6 +133,14 @@ bool unicoap_endpoint_is_equal(const unicoap_endpoint_t* lhs,
 #if IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX)
     case UNICOAP_PROTO_SLIPMUX:
         return lhs->slipmux_ep->config.uart == rhs->slipmux_ep->config.uart;
+#endif /* IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX) */
+#if IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
+    case UNICOAP_PROTO_GATT:
+        /* either peer_addr or conn_handle must match (if set) */
+        return (lhs->peer_addr[0] != 0x00 &&
+                memcmp(lhs->peer_addr, rhs->peer_addr, sizeof(lhs->peer_addr)) == 0) ||
+            (lhs->conn_handle_set && rhs->conn_handle_set &&
+                lhs->conn_handle == rhs->conn_handle);
 #endif /* IS_USED(MODULE_UNICOAP_DRIVER_SLIPMUX) */
     /* MARK: unicoap_driver_extension_point */
     default:
@@ -155,6 +178,9 @@ int unicoap_proto_from_scheme_and_host(const char* scheme, size_t scheme_length,
     if (strncmp(scheme, UNICOAP_SCHEME, scheme_length) == 0) {
         /* MARK: unicoap_driver_extension_point */
         /* CoAP over GATT/BLE domain checks would happen here. */
+        if (host_length == 12 + STRLEN(UNICOAP_DOMAIN_BLE) && strncmp(&host[12], UNICOAP_DOMAIN_BLE, STRLEN(UNICOAP_DOMAIN_BLE)) == 0) {
+            return UNICOAP_PROTO_GATT;
+        }
         return UNICOAP_PROTO_UDP;
     }
     else if (strncmp(scheme, UNICOAP_SCHEME_DTLS, scheme_length) == 0) {
@@ -171,6 +197,8 @@ const char* unicoap_scheme_from_proto(unicoap_proto_t proto)
         return UNICOAP_SCHEME_UDP;
     case UNICOAP_PROTO_DTLS:
         return UNICOAP_SCHEME_DTLS;
+    case UNICOAP_PROTO_GATT:
+        return UNICOAP_SCHEME;
         /* MARK: unicoap_driver_extension_point */
     default:
         return NULL;
@@ -286,8 +314,14 @@ int unicoap_uri_populate(
     }
     /* MARK: unicoap_driver_extension_point */
     /* CoAP over GATT/BLE domain checks would happen here. */
+    if (proto == UNICOAP_PROTO_GATT) {
+        // todo: ifdef guard or always have union members?
+        for (unsigned i=0; i<sizeof(endpoint->peer_addr); i++) {
+            endpoint->peer_addr[i] = fmt_hex_byte(&parsed->host[2*i]);
+        }
+    }
 
-    if ((res = _populate_address(parsed, endpoint)) < 0) {
+    if (proto != UNICOAP_PROTO_GATT && (res = _populate_address(parsed, endpoint)) < 0) {
         _URI_DEBUG("endpoint address resolution from URI failed: %i (%s)\n", res, strerror(-res));
         return res;
     }

@@ -64,13 +64,15 @@ endif
 # This variable ensures the "No drivers" warning gets printed only once
 _UNICOAP_MISSING_DRIVER ?= 0
 
-ifeq (,$(filter %_udp %_dtls %_tcp %_tls %_websocket %_websocket_tls %_slipmux %_rfc7252_common_pdu %_rfc7252_pdu,$(filter unicoap_driver_%,$(USEMODULE))))
+ifeq (,$(filter %_udp %_dtls %_tcp %_tls %_websocket %_websocket_tls %_slipmux %_gatt_central %_gatt_peripheral %_rfc7252_common_pdu %_rfc7252_pdu,$(filter unicoap_driver_%,$(USEMODULE))))
   ifeq (0, $(_UNICOAP_MISSING_DRIVER))
     $(warning No drivers imported, did you forget to import a driver?)
     $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_dtls for CoAP over DTLS driver' 1>&2)
     $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_udp for CoAP over UDP driver' 1>&2)
     $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_rfc7252_pdu for CoAP over UDP/DTLS PDU parser only' 1>&2)
     $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_slipmux for CoAP over Slipmux driver' 1>&2)
+    $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_gatt_central for CoAP over BLE GATT as central device' 1>&2)
+    $(shell echo '+++ FIXIT: Makefile: Add USEMODULE += unicoap_driver_gatt_peripheral for CoAP over BLE GATT as peripheral device' 1>&2)
     # MARK: unicoap_driver_extension_point
   endif
   _UNICOAP_MISSING_DRIVER = 1
@@ -116,6 +118,19 @@ endif
 ifneq (,$(filter unicoap_driver_slipmux,$(USEMODULE)))
   # CoAP over Slipmux uses RFC 7252 messaging layer
   USEMODULE += unicoap_driver_rfc7252_common
+endif
+
+ifneq (,$(filter unicoap_driver_gatt_common,$(USEMODULE)))
+  USEPKG += nimble
+  USEMODULE += nimble_svc_gap
+  USEMODULE += nimble_addr
+  USEMODULE += nimble_svc_gatt
+  USEMODULE += bluetil_ad
+endif
+
+ifneq (,$(filter unicoap_driver_gatt_central unicoap_driver_gatt_peripheral,$(USEMODULE)))
+  # both depend on common messaging and pdu
+  USEMODULE += unicoap_driver_gatt_common
 endif
 
 # MARK: unicoap_driver_extension_point

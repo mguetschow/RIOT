@@ -179,7 +179,8 @@ void unicoap_event_cancel(unicoap_scheduled_event_t* event);
 /** @brief A feature check macro that determines whether there's at least one driver that stores
 *          messaging-layer state for transmissions. */
 #define UNICOAP_HAVE_MESSAGING_STATE \
-    IS_USED(MODULE_UNICOAP_DRIVER_RFC7252_COMMON)
+    IS_USED(MODULE_UNICOAP_DRIVER_RFC7252_COMMON) || \
+    IS_USED(MODULE_UNICOAP_DRIVER_GATT_COMMON)
 /* MARK: unicoap_driver_extension_point */
 
 /**

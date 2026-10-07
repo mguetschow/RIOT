@@ -13,6 +13,15 @@ endif
 ifneq (,$(filter unicoap_driver_slipmux,$(USEMODULE)))
   DIRS += drivers/rfc7252/slipmux
 endif
+ifneq (,$(filter unicoap_driver_gatt_common,$(USEMODULE)))
+  DIRS += drivers/gatt/common
+endif
+ifneq (,$(filter unicoap_driver_gatt_central,$(USEMODULE)))
+  DIRS += drivers/gatt/central
+endif
+ifneq (,$(filter unicoap_driver_gatt_peripheral,$(USEMODULE)))
+  DIRS += drivers/gatt/peripheral
+endif
 
 # MARK: unicoap_driver_extension_point
 

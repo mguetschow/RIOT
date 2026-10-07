@@ -28,10 +28,7 @@
 /* Provides unicoap_receiver_buffer */
 UNICOAP_DECL_RECEIVER_STORAGE_EXTERN;
 
-extern int unicoap_messaging_process_rfc7252(const uint8_t* pdu, size_t size, bool truncated,
-                                             unicoap_packet_t* packet);
-
-void unicoap_slipdev_recv_handler(event_t* event)
+void unicoap_slipdev_recv_handler(event_t *event)
 {
     slipdev_t* dev = container_of(event, slipdev_t, rxevent);
 

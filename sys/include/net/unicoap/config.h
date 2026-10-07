@@ -462,6 +462,41 @@ static_assert(CONFIG_UNICOAP_RETRANSMISSIONS_MAX < 32,
 /** @} */
 /** @} */
 
+/**
+ * @brief Maximum number of GATT peripherals that can be connected in parallel.
+ *
+ * Only applicable when module @ref unicoap_driver_gatt_central is selected.
+ *
+ * **Default**: 1
+ */
+#if !defined(CONFIG_UNICOAP_GATT_CENTRAL_CONNECTIONS_MAX) || defined(DOXYGEN)
+#  define CONFIG_UNICOAP_GATT_CENTRAL_CONNECTIONS_MAX 1
+#endif
+
+/**
+ * @brief Maximum number of GATT centrals that can be connected in parallel.
+ *
+ * Only applicable when module @ref unicoap_driver_gatt_peripheral is selected.
+ *
+ * **Default**: 1
+ */
+#if !defined(CONFIG_UNICOAP_GATT_PERIPHERAL_CONNECTIONS_MAX) || defined(DOXYGEN)
+#  define CONFIG_UNICOAP_GATT_PERIPHERAL_CONNECTIONS_MAX 1
+#endif
+
+/**
+ * @brief For CoAP-over-GATT, whether scanning (for central)
+ * or advertisments (for peripheral) are (re)started automatically.
+ *
+ * Will continue to look for connections until
+ * **Default**: enabled (1)
+ */
+#if !defined(CONFIG_UNICOAP_GATT_AUTOCONNECT) || defined(DOXYGEN)
+#  define CONFIG_UNICOAP_GATT_AUTOCONNECT 1
+#endif
+
+/* MARK: unicoap_driver_extension_point */
+
 /* MARK: - Stack sizes */
 /**
  * @name Stack sizes

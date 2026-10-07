@@ -346,7 +346,8 @@ void unicoap_print_resource_flags(unicoap_resource_flags_t flags);
  *
  * @see @ref UNICOAP_PROTOCOL_FLAG and @ref UNICOAP_PROTOCOLS
  */
-typedef uint8_t unicoap_proto_set_t;
+typedef uint16_t unicoap_proto_set_t;
+// todo: could potentially be made uint8_t again whenever reliable flag ignored for this (then we can have up to 8 again)
 
 /**
  * @brief Prints protocols bitfield

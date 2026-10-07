@@ -9,6 +9,8 @@
 #include <stdint.h>
 
 #include "net/unicoap.h"
+#include "private/drivers/gatt.h"
+#include "private/packet.h"
 
 /**
  * @addtogroup net_unicoap_private
@@ -293,6 +295,22 @@ typedef enum {
 int unicoap_messaging_process_rfc7252(const uint8_t* pdu, size_t size,
     unicoap_messaging_rfc7252_event_type_t event,  unicoap_packet_t* packet);
 
+/**
+ * @brief Internal BLE GATT messaging inbound processor
+ * @param[in] pdu Buffer containing PDU
+ * @param size Size of PDU in bytes
+ * @param[in] remote Remote endpoint
+ *
+ * @returns Negative error number in case of a failure, zero otherwise.
+ *
+ * This function forwards the `truncated` characteristic to the exchange layer, which can handle
+ * that scenario appropriately, such as by setting a Size option.
+ *
+ * @remark While it is not advised to call private API, you might want to consider calling this
+ * function in a very constrained environment or when using `sock` is not an option.
+ */
+int unicoap_messaging_process_gatt(const uint8_t *pdu, size_t size, unicoap_gatt_ctx_t *ctx);
+
 /* MARK: unicoap_driver_extension_point */
 
 /**
@@ -314,6 +332,11 @@ int unicoap_messaging_send(unicoap_packet_t* packet, unicoap_messaging_flags_t f
 
 /** @brief Sends CoAP over UDP or DTLS packet, see @ref unicoap_messaging_send */
 int unicoap_messaging_send_rfc7252(unicoap_packet_t* packet, unicoap_messaging_flags_t flags, void* exchange);
+
+/** @brief Sends CoAP over BLE GATT packet, see @ref unicoap_messaging_send */
+int unicoap_messaging_send_gatt(unicoap_packet_t* packet, unicoap_messaging_flags_t flags, void* exchange);
+
+/* MARK: unicoap_driver_extension_point */
 
 /**
  * @brief Generates new token
