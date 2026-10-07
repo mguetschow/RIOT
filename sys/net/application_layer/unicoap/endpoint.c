@@ -197,7 +197,10 @@ static int _populate_address(uri_parser_result_t* parsed, unicoap_endpoint_t* en
     ipv6_addr_t* v6addr = unicoap_endpoint_get_ipv6_addr(endpoint);
     ipv4_addr_t* v4addr = unicoap_endpoint_get_ipv4_addr(endpoint);
     if (parsed->ipv6addr && (parsed->ipv6addr_len > 0)) {
-        ipv6_addr_from_buf(v6addr, parsed->ipv6addr, parsed->ipv6addr_len);
+        if (!ipv6_addr_from_buf(v6addr, parsed->ipv6addr, parsed->ipv6addr_len)) {
+            _URI_DEBUG("failed to parse ipv6 addr\n");
+            return -EINVAL;
+        }
         *unicoap_endpoint_get_address_family(endpoint) = AF_INET6;
         return 0;
     } else if (ipv4_addr_from_buf(v4addr, parsed->host, parsed->host_len)) {
