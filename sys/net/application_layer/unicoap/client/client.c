@@ -220,7 +220,14 @@ static int _open_request(unicoap_message_t* request,
             }
 
             uint16_t* netif_id = unicoap_endpoint_get_netif_id(&endpoint);
-            if (endpoint.proto == UNICOAP_PROTO_DTLS && IS_USED(MODULE_UNICOAP_DRIVER_DTLS) && IS_ACTIVE(SOCK_HAS_IPV6) && netif_id && *netif_id == 0 && sock_udp_ep_is_v6(unicoap_endpoint_get_dtls(&endpoint)) && ipv6_addr_is_link_local(unicoap_endpoint_get_ipv6_addr(&endpoint))) {
+            if (endpoint.proto == UNICOAP_PROTO_DTLS
+                && IS_USED(MODULE_UNICOAP_DRIVER_DTLS)
+                && IS_ACTIVE(SOCK_HAS_IPV6)
+                && netif_id
+                && *netif_id == 0
+                && sock_udp_ep_is_v6(unicoap_endpoint_get_dtls(&endpoint))
+                && ipv6_addr_is_link_local(unicoap_endpoint_get_ipv6_addr(&endpoint))
+            ) {
                 _CLIENT_DEBUG("warning: v6 link-local with netif id unset, "
                               "tinydtls handshake will fail\n");
                 netif_t* iface = netif_iter(NULL);
